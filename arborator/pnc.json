@@ -1,0 +1,54 @@
+{
+	"outlier_thresh": "25",
+	"clustering_method": "average",
+	"clustering_threshold": "500,100,75,50,25,15,10,5,2,1,0",
+	"min_cluster_members": 2,
+	"partition_column_name": "Outbreak",
+	"id_column_name": "sample_id",
+	"only_report_labeled_columns": "False",
+	"skip_qa": "False",
+
+	"grouped_metadata_columns":{
+		"Outbreak":{ "data_type": "None","label":"Outbreak","default":"","display":"True"},
+		"organism":{ "data_type": "None","label":"organism","default":"","display":"True"},
+		"serovar":{ "data_type": "None","label":"serovar","default":"","display":"True"},
+		"count_members":{ "data_type": "None","label":"count_members","default":"0","display":"True"},
+		"min_dist":{ "data_type": "None","label":"min_dist","default":"0","display":"True"},
+		"mean_dist":{ "data_type": "None","label":"mean_dist","default":"0","display":"True"},
+		"median_dist":{ "data_type": "None","label":"median_dist","default":"0","display":"True"},
+		"max_dist":{ "data_type": "None","label":"max_dist","default":"0","display":"True"},
+		"earliest_date":{ "data_type": "min_max","label":"earliest_date","default":"","display":"False"},
+		"earliest_date_min_value":{ "data_type": "None","label":"earliest_date_min_value","default":"","display":"True"},
+		"earliest_date_max_value":{ "data_type": "None","label":"earliest_date_max_value","default":"","display":"True"},
+		"SourceState":{ "data_type": "None","label":"SourceState","default":"","display":"False"},
+		"count_SourceState_AB":{ "data_type": "Categorical","label":"count_SourceState_AB","default":"0","display":"True"},
+		"count_SourceState_BC":{ "data_type": "Categorical","label":"count_SourceState_BC","default":"0","display":"True"},
+		"count_SourceState_MB":{ "data_type": "Categorical","label":"count_SourceState_MB","default":"0","display":"True"},
+		"count_SourceState_NB":{ "data_type": "Categorical","label":"count_SourceState_NB","default":"0","display":"True"},
+		"count_SourceState_NL":{ "data_type": "Categorical","label":"count_SourceState_NL","default":"0","display":"True"},
+		"count_SourceState_NS":{ "data_type": "Categorical","label":"count_SourceState_NS","default":"0","display":"True"},
+		"count_SourceState_NU":{ "data_type": "Categorical","label":"count_SourceState_NU","default":"0","display":"True"},
+		"count_SourceState_ON":{ "data_type": "Categorical","label":"count_SourceState_ON","default":"0","display":"True"},
+		"count_SourceState_PE":{ "data_type": "Categorical","label":"count_SourceState_PE","default":"0","display":"True"},
+		"count_SourceState_QC":{ "data_type": "Categorical","label":"count_SourceState_QC","default":"0","display":"True"},
+		"count_SourceState_SK":{ "data_type": "Categorical","label":"count_SourceState_SK","default":"0","display":"True"},
+		"source_type":{ "data_type": "Categorical","label":"source_type","default":"","display":"True"},
+		"count_source_type_Animal":{ "data_type": "None","label":"count_source_type_Animal","default":"0","display":"True"},
+		"count_source_type_Food":{ "data_type": "None","label":"count_source_type_Food","default":"0","display":"True"},
+		"count_source_type_Environmental":{ "data_type": "None","label":"count_source_type_Environmental","default":"0","display":"True"},
+		"count_source_type_Human":{ "data_type": "None","label":"count_source_type_Human","default":"0","display":"True"}
+
+
+
+	},
+	"linelist_columns":{
+		"Outbreak":{ "data_type": "None","label":""},
+		"organism":{ "data_type": "None","label":""},
+		"subtype":{ "data_type": "None","label":""},
+		"cgmlst_nomenclature":{ "data_type": "None","label":""},
+		"earliest_date":{ "data_type": "min_max","label":""},
+		"patient_age":{ "data_type": "desc_stats","label":""}
+
+	}
+
+}
