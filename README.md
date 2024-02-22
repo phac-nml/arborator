@@ -4,7 +4,8 @@
 [![License: Apache-2.0](https://img.shields.io/github/license/phac-nml/arborator)](https://www.apache.org/licenses/LICENSE-2.0)
 
 
-## Profile Dists
+## Arborator
+![alt text](https://github.com/phac-nml/arborator/blob/master/logo.png?raw=true)
 
 ## Contents
 
