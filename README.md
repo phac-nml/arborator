@@ -21,41 +21,47 @@
 
 Opperationalized pathogen genomic surveillance and outbreak detection frequently makes use dendrograms in conjunction with
 organism specific genetic distance thresholds to "rule out" cases which are sufficiently genetically distinct that they 
-are not part of the same "event". Teh genomic data is then combined with contextual sample data
+are not part of the same "event". The genomic data is then combined with contextual sample data
 to assess the situation and inform further action.There are many different types of outbreaks within food/waterborne pathogens 
 which may involve a general failure of a process where contamination is generalized and is multi-organism, which is 
-identified through other means. Arborator is designed to make the process of taking genomic profiles of alleles/snps/mutations
-and contextual metadata and perform 1) splitting of the samples into groups based on user defined column 2) calculating 
-within group dendrograms, outlier detection, and summary reports 3) aggregate group level metrics for providing summary reports.
+identified through other means. 
+
+Arborator is designed to make the process of taking genomic profiles of alleles/snps/mutations
+and contextual metadata and perform:
+
+1) splitting of the samples into groups based on user defined column
+2) calculating within group dendrograms, outlier detection, and summary reports 
+3) aggregate group level metrics for providing summary reports.
 
 
 ## Installation
 
 Install the latest released version from conda:
 
-        conda create -c bioconda -c conda-forge -n profile_dists profile_dists
+        conda create -c bioconda -c conda-forge -n arborator arborator
 
 Install using pip:
 
-        pip install profile_dists
+        pip install arborator
 
 Install the latest master branch version directly from Github:
 
-        pip install git+https://github.com/phac-nml/profile_dists.git
+        pip install git+https://github.com/phac-nml/arborator.git
 
 
 
 ## Usage
-If you run ``profile_dists``, you should see the following usage statement:
+If you run ``arborator``, you should see the following usage statement:
 
-    usage: dist.py [-h] --query QUERY --ref REF --outdir OUTDIR [--outfmt OUTFMT]
-                   [--file_type FILE_TYPE] [--distm DISTM]
-                   [--missing_thresh MISSING_THRESH]
-                   [--sample_qual_thresh SAMPLE_QUAL_THRESH]
-                   [--match_threshold MATCH_THRESHOLD]
-                   [--mapping_file MAPPING_FILE] [--force] [-s] [-V]
+    usage: arborator [-h] --profile PROFILE --metadata METADATA
+                     [--config CONFIG] --outdir OUTDIR --partition_col
+                     PARTITION_COL --id_col ID_COL
+                     [--outlier_thresh OUTLIER_THRESH]
+                     [--min_cluster_members MIN_CLUSTER_MEMBERS] [-n] [-s]
+                     [--missing_thresh MISSING_THRESH] -t THRESHOLDS
+                     [-d DELIMETER] [-e METHOD] [--force] [--cpus CPUS] [-V]
 
-Supported profile formats
+Supported input profile formats
 =====
 **Native**
 
@@ -113,6 +119,70 @@ Output Profile
 - All columns are converted to contain only integers with missing data represented as a 0
 
 
+Supported input metatdata formats
+=====
+Arborator allows for a great deal of flexibility with the input set of columns that can be supplied to the program. It
+has the constraints that the first column must be the sample identifier column, and it must be tab-delimited. 
+
+**Example 1**
+
+| id | Country | Source | Date |
+| ----------- | -----------| ----------- | ----------- |
+| S1 | Canada | Chicken | 2024-01-01 |
+| S2 | Canada | Chicken | 2024-01-02 |
+| S3 | United States | Chicken | 2024-01-03 |
+| S4 | United Kingdom | Chicken | 2024-01-04 |
+| S5 | Brazil | Chicken | 2023-12-01 |
+| S6 | Canada | Chicken | 2023-11-02 |
+
+**Example 2**
+
+| sample_id | geo_loc        | age | collection date | outbreak |
+|-----------|----------------|-----|-----------------|----------|	
+| S1        | Canada         | 50  | 2024-01-01      | 1        |
+| S2        | Canada         | 25  | 2024-01-02      | 1        |
+| S3        | United States  | 10  | 2024-01-03      | 1        |
+| S4        | United Kingdom | 1   | 2024-01-04      | 2        |
+| S5        | Brazil         | 56  | 2023-12-01      | 2        |
+| S6        | Canada         | 17  | 2023-11-02      | 2        |
+
+
+Supported input configuration file
+=====
+There are a large number of parameters to configure within Arborator, so to enable consistency and ease for templating
+reports, we accept a configuration json object which allows the user to specify opperations for summarizing columns,
+and how they would be reported. Users can setup specific configurations for each of their target organisms of interest and
+use the config file as input to arborator for routine operations.
+
+    {
+        "outlier_thresh": "25",
+        "clustering_method": "average",
+        "clustering_threshold": "500,100,75,50,25,15,10,5,2,1,0",
+        "min_cluster_members": 2,
+        "partition_column_name": "outbreak",
+        "id_column_name": "sample_id",
+        "only_report_labeled_columns": "False",
+        "skip_qa": "False",
+        
+        #Used to configure the order and opperations of columns in the grouped summary (optional)
+        "grouped_metadata_columns":{ 
+            "outbreak":{ "data_type": "None","label":"National Outbreak Code","default":"","display":"True"},  #Changing the label configures the output file to use this as the header name
+            "geo_loc":{ "data_type": "categorical","label":"Country of collection","default":"","display":"True"},
+            "age":{ "data_type": "desc_stats","label":"Patient Age (years)","default":"","display":"True"}, #Changing data_type to desc_stats causes the column to be reported in terms of min, median, mean, max values in the column
+            "collection date":{ "data_type": "min_max","label":"serovar","default":"","display":"True"}, #Changing data_type to min_mac causes the column to be reported in terms of min, max values in the column
+        },
+        #Used to configure the display of columns in the line list for individual samples (optional)
+        "linelist_columns":{
+            "outbreak":{ "data_type": "None","label":"National Outbreak Code","default":"","display":"True"},
+            "geo_loc":{ "data_type": "categorical","label":"organism","default":"","display":"True"},
+            "age":{ "data_type": "desc_stats","label":"Patient Age (years)","default":"","display":"True"}, #Changing data_type to desc_stats causes the column to be reported in terms of min, median, mean, max values in the column
+            "collection date":{ "data_type": "min_max","label":"serovar","default":"","display":"False"}, #Toggling false removes this column from output
+        }
+    
+}
+
+
+
 Quick start
 =====
 
@@ -152,7 +222,7 @@ Coming soon
 
 ## Citation
 
-Robertson, James, Wells, Matthew, Schonfeld, Justin, Reimer, Aleisha. Profile Dists: Convenient package for comparing genetic similarity of samples based on allelic profiles. 2023. https://github.com/phac-nml/profile_dists
+Robertson, James, Wells, Matthew, Schonfeld, Justin, Reimer, Aleisha. Arborator: Streamlining public health pathogen outbreak and surveillance operations. 2024. https://github.com/phac-nml/arborator
 
 ## Legal
 
