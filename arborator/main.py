@@ -45,7 +45,7 @@ def parse_args():
         pass
 
     parser = ArgumentParser(
-        description="Cluster reporter, an aggregate tool for producing summary reports of genetic distances within groups v. {}".format(__version__),
+        description="Arborator, an aggregate tool for producing summary reports of genetic distances within groups v. {}".format(__version__),
         formatter_class=CustomFormatter)
     parser.add_argument('--profile','-p', type=str, required=True, help='Allelic profiles')
     parser.add_argument('--metadata','-r', type=str, required=True, help='Matched metadata for samples in the allele profile')
@@ -261,8 +261,11 @@ def prepare_linelist(column_info,df,columns):
 def update_column_order(df,col_properties,restrict=False):
     cols = {}
     df_cols = set(df.columns)
+    num_rows = len(df)
     for col in col_properties:
         cols[col] = col_properties[col]['label']
+        if col not in df_cols:
+            df[col] = [col_properties[col]['default']] * num_rows
 
 
     order = list(cols.keys())
@@ -276,7 +279,7 @@ def update_column_order(df,col_properties,restrict=False):
     df = df.reindex(columns=order)
     df = df.rename(columns=cols)
 
-    return df[list(cols.keys())]
+    return df[list(cols.values())]
 
 
 
@@ -441,10 +444,14 @@ def cluster_reporter(config):
     summary_data = compile_group_data(group_metrics=group_metrics, field_data_types=cluster_summary_cols_properties,
                                       id_col=partition_col, field_name_key='metadata', field_name_value='value_counts',
                                       header=cluster_summary_header)
-
     summary_df = pd.DataFrame.from_dict(summary_data, orient='index')
-    summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
+    cluster_display_cols_to_remove = list(set(cluster_display_cols_to_remove) & set(list(summary_df.columns)))
     summary_df = summary_df.drop(cluster_display_cols_to_remove, axis=1)
+    for k in cluster_display_cols_to_remove:
+        del(cluster_summary_cols_properties[k])
+    summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
+
+
 
 
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)

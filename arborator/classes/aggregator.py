@@ -15,7 +15,8 @@ class summarizer:
     data = {}
 
     def __init__(self,header,dictionary,field_data_types,field_name_key,field_name_value):
-        self.header = header + self.get_fields(dictionary,field_data_types,field_name_key,field_name_value)
+        self.header = sorted(header + self.get_fields(dictionary,field_data_types,field_name_key,field_name_value))
+
         self.data = self.populate_records(dictionary,field_data_types,field_name_key,field_name_value)
 
 
@@ -88,6 +89,15 @@ class summarizer:
             }
         return s
 
+    def is_numbers(self,values):
+        df = pd.DataFrame(data={'column1':values})
+        try:
+            df.astype(float)
+        except:
+            return False
+        return True
+
+
     def is_date(self,values):
         d = self.convert_date(values)
         if len(d) > 0:
@@ -95,7 +105,7 @@ class summarizer:
         return False
 
     def convert_date(self,values):
-        return pd.to_datetime(values, errors='coerce').dropna()
+        return pd.to_datetime(values, errors='coerce',format="%Y-%m-%d").dropna()
 
 
 
@@ -106,6 +116,7 @@ class summarizer:
             data = dictionary[group_id][field_name_key]
             for col in data:
                 col_dtype = 'categorical'
+                records[group_id][col] = ",".join(sorted([str(x) for x in list(data[col][field_name_value].keys())]))
                 if col in field_data_types and 'data_type' in field_data_types[col]:
                     col_dtype = field_data_types[col]['data_type']
 
@@ -119,14 +130,22 @@ class summarizer:
                         records[group_id][col] = ",".join([str(x) for x in list(data[col][field_name_value].keys())])
                     else:
                         if col_dtype == 'desc_stats' or col_dtype == 'min_max':
-                            values = list(data[col][field_name_value].values())
-                            if self.is_date(list(data[col][field_name_value].keys())):
-                                values = list(data[col][field_name_value].keys())
+                            values = list(data[col][field_name_value].keys())
+                            print(f'{col} {values}')
+                            if self.is_numbers(values):
+                                values = []
+                                for k in data[col][field_name_value]:
 
-                            if self.is_date(values):
-                                dstats = self.calc_desc_stats_dates(values)
-                            else:
+                                    values += [float(k)] * data[col][field_name_value][k]
                                 dstats = self.calc_desc_stats_numerical(values)
+                            else:
+                                if self.is_date(list(data[col][field_name_value].keys())):
+                                    dstats = self.calc_desc_stats_dates(values)
+                                else:
+                                    values = list(data[col][field_name_value].values())
+                                    if self.is_date(values):
+                                        dstats = self.calc_desc_stats_dates(values)
+
 
                             records[group_id][f'{col}_min_value'] = dstats['min']
                             records[group_id][f'{col}_max_value'] = dstats['max']
@@ -136,6 +155,7 @@ class summarizer:
                                 records[group_id][f'{col}_median_value'] = dstats['median']
                         else:
                             records[group_id][col] = data[col][field_name_value]
+        print(records)
         return records
 
     def get_data(self):
