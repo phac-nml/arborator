@@ -131,7 +131,6 @@ class summarizer:
                     else:
                         if col_dtype == 'desc_stats' or col_dtype == 'min_max':
                             values = list(data[col][field_name_value].keys())
-                            print(f'{col} {values}')
                             if self.is_numbers(values):
                                 values = []
                                 for k in data[col][field_name_value]:
@@ -155,7 +154,6 @@ class summarizer:
                                 records[group_id][f'{col}_median_value'] = dstats['median']
                         else:
                             records[group_id][col] = data[col][field_name_value]
-        print(records)
         return records
 
     def get_data(self):
