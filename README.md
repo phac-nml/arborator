@@ -1,7 +1,7 @@
-[![PyPI](https://img.shields.io/badge/Install%20with-PyPI-blue)](https://pypi.org/project/profile_dists/#description)
-[![Bioconda](https://img.shields.io/badge/Install%20with-bioconda-green)](https://anaconda.org/bioconda/profile_dists)
-[![Conda](https://img.shields.io/conda/dn/bioconda/profile_dists?color=green)](https://anaconda.org/bioconda/profile_dists)
-[![License: Apache-2.0](https://img.shields.io/github/license/phac-nml/profile_dists)](https://www.apache.org/licenses/LICENSE-2.0)
+[![PyPI](https://img.shields.io/badge/Install%20with-PyPI-blue)](https://pypi.org/project/arborator/#description)
+[![Bioconda](https://img.shields.io/badge/Install%20with-bioconda-green)](https://anaconda.org/bioconda/arborator)
+[![Conda](https://img.shields.io/conda/dn/bioconda/arborator?color=green)](https://anaconda.org/bioconda/arborator)
+[![License: Apache-2.0](https://img.shields.io/github/license/phac-nml/arborator)](https://www.apache.org/licenses/LICENSE-2.0)
 
 
 ## Profile Dists
@@ -29,9 +29,9 @@ identified through other means.
 Arborator is designed to make the process of taking genomic profiles of alleles/snps/mutations
 and contextual metadata and perform:
 
-1) splitting of the samples into groups based on user defined column
-2) calculating within group dendrograms, outlier detection, and summary reports 
-3) aggregate group level metrics for providing summary reports.
+1) Splitting a large target collection of samples into invidual profile and metadata files
+2) Calculating within group genetic diversity statistics, generating dendrograms along with flat clusters based on thresholds, outlier detection, and loci summary reports 
+3) Summarized report accross all analyzed groups
 
 
 ## Installation
@@ -67,6 +67,7 @@ Run the test dataset using the data included in the repository under test_data
 
     arborator --profile ./test_data/profile.tsv --metadata ./test_data/metadata.tsv --config ./arborator/test_data/config.json --outdir ./test_data/results --id_col id --partition_col outbreak --thresholds 10,9,8,7,6,5,4,3,2,1
 
+![alt text](https://github.com/phac-nml/arborator/blob/main/ArboratorWorkflow.png?raw=true)
 
 
 Supported input profile formats
