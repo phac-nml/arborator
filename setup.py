@@ -2,7 +2,7 @@
 import os
 from distutils.core import setup
 from setuptools import find_packages
-from profile_dists.version import __version__
+from arborator.version import __version__
 author = 'James Robertson'
 
 classifiers = """
@@ -24,25 +24,25 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-exec(open('profile_dists/version.py').read())
+exec(open('arborator/version.py').read())
 
 setup(
-    name='profile_dists',
+    name='arborator',
     include_package_data=True,
     version=__version__,
     python_requires='>=3.8.2,<4',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=find_packages(exclude=['tests']),
-    url='https://github.com/phac-nml/profile_dists',
+    url='https://github.com/phac-nml/arborator',
     license='GPLv3',
     author='James Robertson',
     author_email='james.robertson@phac-aspc.gc.ca',
     description=(
-        'Profile Dists: Rapid calcualtion of allele profile distances and distance base querying'),
+        'Arborator: Simplifying operationalized pathogen surveillance and outbreak detection'),
     keywords='cgMLST, wgMLST, outbreak, surveillance, clustering, distance matrix',
     classifiers=classifiers,
-    package_dir={'profile_dists': 'profile_dists'},
+    package_dir={'arborator': 'arborator'},
     package_data={
         "": ["*.txt"],
     },
@@ -56,12 +56,14 @@ setup(
         'six>=1.16.0',
         'pandas==2.0.2 ',
         'psutil'
+        'profile_dists',
+        'genomic_address_service'
 
     ],
 
     entry_points={
         'console_scripts': [
-            'profile_dists=profile_dists.main:main',
+            'arborator=arborator.main:main',
         ],
     },
 )
