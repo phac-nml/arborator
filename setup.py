@@ -55,7 +55,7 @@ setup(
         'tables==3.8.0',
         'six>=1.16.0',
         'pandas==2.0.2 ',
-        'psutil'
+        'psutil',
         'profile_dists',
         'genomic_address_service'
 
