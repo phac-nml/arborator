@@ -67,7 +67,7 @@ Run the test dataset using the data included in the repository under test_data
 
     arborator --profile ./test_data/profile.tsv --metadata ./test_data/metadata.tsv --config ./arborator/test_data/config.json --outdir ./test_data/results --id_col id --partition_col outbreak --thresholds 10,9,8,7,6,5,4,3,2,1
 
-![alt text](https://github.com/phac-nml/arborator/blob/main/ArboratorWorkflow.png?raw=true)
+![alt text](https://github.com/phac-nml/arborator/blob/master/ArboratorWorkflow.png?raw=true)
 
 
 Supported input profile formats
