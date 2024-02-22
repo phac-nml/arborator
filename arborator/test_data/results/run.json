@@ -1,0 +1,14 @@
+{
+    "threshold_map": {
+        "level_1": 10.0,
+        "level_2": 9.0,
+        "level_3": 8.0,
+        "level_4": 7.0,
+        "level_5": 6.0,
+        "level_6": 5.0,
+        "level_7": 4.0,
+        "level_8": 3.0,
+        "level_9": 2.0,
+        "level_10": 1.0
+    }
+}

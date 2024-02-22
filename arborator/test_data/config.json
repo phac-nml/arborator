@@ -1,0 +1,29 @@
+    {
+        "outlier_thresh": "25",
+        "clustering_method": "average",
+        "clustering_threshold": "500,100,75,50,25,15,10,5,2,1,0",
+        "min_cluster_members": 2,
+        "partition_column_name": "outbreak",
+        "id_column_name": "sample_id",
+        "only_report_labeled_columns": "False",
+        "skip_qa": "False",
+        
+        "grouped_metadata_columns":{ 
+            "outbreak":{ "data_type": "None","label":"National Outbreak Code","default":"","display":"True"},  
+            "country":{ "data_type": "categorical","label":"Country of collection","default":"","display":"False"},
+            "serovar":{ "data_type": "categorical","label":"Serovar","default":"","display":"False"}, 
+            "age":{ "data_type": "desc_stats","label":"Patient Age (years)","default":"","display":"True"}, 
+            "date":{ "data_type": "min_max","label":"serovar","default":"","display":"True"}, 
+            "source":{ "data_type": "categorical","label":"Source Type","default":"","display":"True"}
+        },
+
+        "linelist_columns":{
+            "outbreak":{ "data_type": "None","label":"National Outbreak Code","default":"","display":"True"},  
+            "country":{ "data_type": "categorical","label":"Country of collection","default":"","display":"True"},
+            "serovar":{ "data_type": "categorical","label":"Serovar","default":"","display":"True"}, 
+            "age":{ "data_type": "desc_stats","label":"Patient Age (years)","default":"","display":"True"}, 
+            "date":{ "data_type": "min_max","label":"serovar","default":"","display":"True"}, 
+            "source":{ "data_type": "categorical","label":"Source Type","default":"","display":"False"}
+        }
+    
+    }
