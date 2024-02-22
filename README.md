@@ -61,6 +61,14 @@ If you run ``arborator``, you should see the following usage statement:
                      [--missing_thresh MISSING_THRESH] -t THRESHOLDS
                      [-d DELIMETER] [-e METHOD] [--force] [--cpus CPUS] [-V]
 
+## Quick Start
+
+Run the test dataset using the data included in the repository under test_data
+
+    arborator --profile ./test_data/profile.tsv --metadata ./test_data/metadata.tsv --config ./arborator/test_data/config.json --outdir ./test_data/results --id_col id --partition_col outbreak --thresholds 10,9,8,7,6,5,4,3,2,1
+
+
+
 Supported input profile formats
 =====
 **Native**
@@ -179,8 +187,16 @@ use the config file as input to arborator for routine operations.
             "collection date":{ "data_type": "min_max","label":"serovar","default":"","display":"False"}, #Toggling false removes this column from output
         }
     
-}
+    }
 
+**Supported column summarization choices:**
+1) none - All values within the column are concatonated by a comma
+
+2) categorical - Counts for all unique values are determined and then the count is provided in the format count_{column name}_{lable} : {count} (default)
+
+3) min_max - The minimum and maximum values for the column are determined (dates and numerical data only) and reported as {column name}_min_value, {column name}_max_value,
+
+5) desc_stats - Descriptive stats are determined for the column values (numerical data only) and reported as {column name}_min_value, {column name}_median_value, {column name}_mean_value, {column name}_max_value
 
 
 Quick start
