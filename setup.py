@@ -45,6 +45,7 @@ setup(
     package_dir={'arborator': 'arborator'},
     package_data={
         "": ["*.tsv"],
+        "": ["*.json"],
     },
 
     install_requires=[
