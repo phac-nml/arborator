@@ -44,7 +44,7 @@ setup(
     classifiers=classifiers,
     package_dir={'arborator': 'arborator'},
     package_data={
-        "": ["*.txt"],
+        "": ["*.tsv"],
     },
 
     install_requires=[
