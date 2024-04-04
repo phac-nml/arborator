@@ -56,6 +56,7 @@ setup(
         'six>=1.16.0',
         'pandas==2.0.2 ',
         'psutil',
+        'scipy',
         'profile_dists',
         'genomic_address_service'
 
