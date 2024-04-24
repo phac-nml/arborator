@@ -97,20 +97,33 @@ def remove_columns(df,missing_value,max_missing_frac=1):
 
 def get_outliers_matrix(file_path, thresh,delim="\t"):
     outliers = []
+    ave_dists = {}
     with open(file_path, 'r') as f:
         header = next(f).strip().split(delim)[1:]
         offset = 2
+        for idx,value in enumerate(header[1:]):
+            ave_dists[value] = 0
         for line in f:
+            
             line_split = line.strip().split(delim)
+
             if len(line_split) < 1:
                 continue
             v = [float(x) for x in line_split[offset:]]
+            h = header[offset-1:]
             for idx,value in enumerate(v):
+                ave_dists[h[idx]]+=value
                 if value > thresh:
-                    outliers.append([line_split[0],header[idx],value])
-
+                    outliers.append([line_split[0],h[idx],value])
             offset += 1
-    return (outliers)
+    num_samples = len(ave_dists)
+    outlier_ids = list()
+    for id in ave_dists:
+        ave = ave_dists[id] / num_samples
+        if ave > thresh:
+            outlier_ids.append(id)
+
+    return (outlier_ids,outliers)
 
 def write_outliers(outliers,outfile):
     with open(outfile, 'w') as f:
@@ -204,11 +217,12 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         med_dist = median(dists)
         max_dist = max(dists)
         report(df, [id_col]).write_data(output_files['summary'])
-        outliers = get_outliers_matrix(output_files['matrix'], outlier_thresh, delim="\t")
-        write_outliers(outliers, output_files['outliers'])
+        (outlier_ids, pairwise_outlier) = get_outliers_matrix(output_files['matrix'], outlier_thresh, delim="\t")
+        write_outliers(pairwise_outlier, output_files['outliers'])
 
         if os.path.isfile(output_files['clusters']) and os.path.isfile(output_files["metadata"]):
             clust_df = pd.read_csv(output_files['clusters'],sep="\t",header=0)
+            clust_df = clust_df.rename(columns={'id': id_col})
             metadata_df = pd.read_csv(output_files['metadata'],sep="\t",header=0)
             pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files['metadata'],sep="\t",header=True,index=False)
             del(clust_df)
@@ -220,7 +234,8 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         'mean_dist': mean_dist,
         'median_dist': med_dist,
         'max_dist': max_dist,
-        'count_outliers': len(outliers),
+        'count_outliers': len(outlier_ids),
+        'outlier_ids':",".join([str(x) for x in outlier_ids]),
         'metadata':metadata_summary
     }
     }
@@ -369,6 +384,7 @@ def cluster_reporter(config):
         cluster_summary_cols_properties['mean_dist'] = { "data_type": "none","label":'mean_dist',"default":"","display":"True"}
         cluster_summary_cols_properties['max_dist'] = { "data_type": "none","label":'max_dist',"default":"","display":"True"}
         cluster_summary_cols_properties['count_outliers'] = { "data_type": "none","label":'count_outliers',"default":"","display":"True"}
+        cluster_summary_cols_properties['outlier_ids'] = { "data_type": "none","label":'outlier_ids',"default":"","display":"True"}
         cluster_summary_header = list(cluster_summary_cols_properties.keys())
 
     if len(cluster_summary_header) == 0:
@@ -452,7 +468,6 @@ def cluster_reporter(config):
     ovl_samples = list(ovl_samples)
 
     metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False)
-
     groups = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col).subsets
     filtered_samples = pd.concat(list(groups.values()), ignore_index=True)[id_col].to_list()
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(filtered_samples)], columns=[])
