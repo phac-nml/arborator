@@ -54,20 +54,19 @@ def parse_args():
     parser.add_argument('--outdir', '-o', type=str, required=True, help='Result output files')
     parser.add_argument('--partition_col', '-a', type=str, required=True, help='Metadata column name for aggregating samples' )
     parser.add_argument('--id_col', '-i', type=str, required=True, help='Sample identifier column' )
-    parser.add_argument('--outlier_thresh', type=str, required=False, help='Threshold to flag outlier comparisons within a group')
+    parser.add_argument('--outlier_thresh', type=float, required=True, help='Threshold to flag outlier comparisons within a group')
     parser.add_argument('--min_cluster_members','-m', type=int, required=False,
                         help='Minimum number of members to perform clustering',default=2)
 
     #profile dists
     parser.add_argument('-n', '--count_missing', required=False, help='Count missing as differences',
                         action='store_true')
-    parser.add_argument('-s', '--skip', required=False, help='Skip QA/QC steps',
-                        action='store_true')
     parser.add_argument('--missing_thresh', type=float, required=False,
                         help='Maximum percentage of missing data allowed per locus (0 - 1)',default=1.0)
-
+    parser.add_argument('--distm', type=str, required=False, help='Distance method raw hamming or scaled difference [hamming, scaled]',default='scaled')
+    parser.add_argument('-s', '--skip', required=False, help='Skip QA/QC steps',
+                        action='store_true')
     #GAS
-
     parser.add_argument('-t','--thresholds', type=str, required=True, help='thresholds delimited by ,')
     parser.add_argument('-d', '--delimeter', type=str, required=False, help='delimeter desired for nomenclature code',
                         default=".")
@@ -76,9 +75,8 @@ def parse_args():
 
     parser.add_argument('--force','-f', required=False, help='Overwrite existing directory',
                         action='store_true')
-
-
-    parser.add_argument( '--cpus', required=False, type=int, help='Count missing as differences',default=1)
+    parser.add_argument('--n_threads', type=int, required=False,
+                        help='CPU Threads to use', default=1)
     parser.add_argument('-V', '--version', action='version', version="%(prog)s " + __version__)
 
     return parser.parse_args()
@@ -99,20 +97,33 @@ def remove_columns(df,missing_value,max_missing_frac=1):
 
 def get_outliers_matrix(file_path, thresh,delim="\t"):
     outliers = []
+    ave_dists = {}
     with open(file_path, 'r') as f:
         header = next(f).strip().split(delim)[1:]
         offset = 2
+        for idx,value in enumerate(header[1:]):
+            ave_dists[value] = 0
         for line in f:
+            
             line_split = line.strip().split(delim)
+
             if len(line_split) < 1:
                 continue
             v = [float(x) for x in line_split[offset:]]
+            h = header[offset-1:]
             for idx,value in enumerate(v):
+                ave_dists[h[idx]]+=value
                 if value > thresh:
-                    outliers.append([line_split[0],header[idx],value])
-
+                    outliers.append([line_split[0],h[idx],value])
             offset += 1
-    return (outliers)
+    num_samples = len(ave_dists)
+    outlier_ids = list()
+    for id in ave_dists:
+        ave = ave_dists[id] / num_samples
+        if ave > thresh:
+            outlier_ids.append(id)
+
+    return (outlier_ids,outliers)
 
 def write_outliers(outliers,outfile):
     with open(outfile, 'w') as f:
@@ -138,6 +149,12 @@ def stage_data(groups,outdir,metadata_df,id_col,max_missing_frac=1):
             "outliers": os.path.join(d, "outliers.tsv"),
 
         }
+
+        #remove existing files if they exist
+        for fname in files[group_id]:
+            if os.path.isfile(files[group_id][fname]):
+                os.remove(files[group_id][fname])
+
         df = remove_columns(groups[group_id], '0', max_missing_frac=max_missing_frac)
         df.to_csv(files[group_id]['profile'], sep="\t", header=True, index=False)
         metadata_df[metadata_df[id_col].isin(list(groups[group_id][id_col]))].to_csv(files[group_id]['metadata'], sep="\t", header=True, index=False)
@@ -200,9 +217,16 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         med_dist = median(dists)
         max_dist = max(dists)
         report(df, [id_col]).write_data(output_files['summary'])
-        outliers = get_outliers_matrix(output_files['matrix'], outlier_thresh, delim="\t")
-        write_outliers(outliers, output_files['outliers'])
+        (outlier_ids, pairwise_outlier) = get_outliers_matrix(output_files['matrix'], outlier_thresh, delim="\t")
+        write_outliers(pairwise_outlier, output_files['outliers'])
 
+        if os.path.isfile(output_files['clusters']) and os.path.isfile(output_files["metadata"]):
+            clust_df = pd.read_csv(output_files['clusters'],sep="\t",header=0)
+            clust_df = clust_df.rename(columns={'id': id_col})
+            metadata_df = pd.read_csv(output_files['metadata'],sep="\t",header=0)
+            pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files['metadata'],sep="\t",header=True,index=False)
+            del(clust_df)
+            del(metadata_df)
 
     return { group_id:{
         'count_members': len(l),
@@ -210,13 +234,16 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         'mean_dist': mean_dist,
         'median_dist': med_dist,
         'max_dist': max_dist,
-        'count_outliers': len(outliers),
+        'count_outliers': len(outlier_ids),
+        'outlier_ids':",".join([str(x) for x in outlier_ids]),
         'metadata':metadata_summary
     }
     }
 
 def compile_group_data(group_metrics, field_data_types,id_col,field_name_key,field_name_value,header=[]):
-    data = summarizer(header,group_metrics,field_data_types,field_name_key,field_name_value).get_data()
+    s = summarizer(header,group_metrics,field_data_types,field_name_key,field_name_value)
+    data = s.get_data()
+    header = s.header
     for id in data:
         record = data[id]
         record[id_col] = id
@@ -260,7 +287,7 @@ def prepare_linelist(column_info,df,columns):
 
 def update_column_order(df,col_properties,restrict=False):
     cols = {}
-    df_cols = set(df.columns)
+    df_cols = list(df.columns)
     num_rows = len(df)
     for col in col_properties:
         cols[col] = col_properties[col]['label']
@@ -298,7 +325,22 @@ def cluster_reporter(config):
     skip_qc = config['skip_qc']
     num_threads = config['num_threads']
 
+    missing_thresh = config['missing_thresh']
+    distm = config['distm']
+    count_missing = config['count_missing']
+    delimeter = config['delimeter']
+
+    try:
+        sys_num_cpus = len(os.sched_getaffinity(0))
+    except AttributeError:
+        sys_num_cpus = cpu_count()
+
+    if num_threads > sys_num_cpus:
+        num_threads = sys_num_cpus
+
     run_data = {}
+    run_data['analysis_start_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    run_data['parameters'] = config
     restrict_output = False
     if "only_report_labeled_columns" in config:
         restrict_output = config["only_report_labeled_columns"]
@@ -335,8 +377,15 @@ def cluster_reporter(config):
                 v = cluster_summary_cols_properties[f]['display'].lower()
                 if v in ['f','false']:
                     cluster_display_cols_to_remove.append(f)
-
-
+    else:
+        cluster_summary_cols_properties[partition_col] = { "data_type": "none","label":partition_col,"default":"","display":"True"}
+        cluster_summary_cols_properties['min_dist'] = { "data_type": "none","label":'min_dist',"default":"","display":"True"}
+        cluster_summary_cols_properties['median_dist'] = { "data_type": "none","label":'median_dist',"default":"","display":"True"}
+        cluster_summary_cols_properties['mean_dist'] = { "data_type": "none","label":'mean_dist',"default":"","display":"True"}
+        cluster_summary_cols_properties['max_dist'] = { "data_type": "none","label":'max_dist',"default":"","display":"True"}
+        cluster_summary_cols_properties['count_outliers'] = { "data_type": "none","label":'count_outliers',"default":"","display":"True"}
+        cluster_summary_cols_properties['outlier_ids'] = { "data_type": "none","label":'outlier_ids',"default":"","display":"True"}
+        cluster_summary_header = list(cluster_summary_cols_properties.keys())
 
     if len(cluster_summary_header) == 0:
         cluster_summary_header = [partition_col]
@@ -398,9 +447,28 @@ def cluster_reporter(config):
     (allele_map, profile_df) = process_profile(profile_file, column_mapping={})
     profile_df.insert(0, id_col, profile_df.index.to_list())
 
+    #write allele mapping file
+    with open(os.path.join(outdir,"allele_map.json"),'w' ) as fh:
+        fh.write(json.dumps(allele_map, indent=4))
+
     metadata = read_data(partition_file)
     metadata_df = metadata.df
-    groups = split_profiles(profile_df,partition_file,id_col,partition_col).subsets
+
+    input_profile_samples = set(profile_df[id_col])
+    input_metadata_samples = set(metadata_df[id_col])
+
+    ovl_samples = input_profile_samples & input_metadata_samples
+    missing_profile_samples = input_profile_samples - ovl_samples
+    missing_metadata_samples = input_metadata_samples - ovl_samples
+
+    run_data['count_missing_profile_samples'] = len(missing_profile_samples)
+    run_data['missing_profile_samples'] = ",".join(sorted(list(missing_profile_samples)))
+    run_data['count_missing_metadata_samples'] = len(missing_metadata_samples)
+    run_data['missing_metadata_samples'] = ",".join(sorted(list(missing_metadata_samples)))
+    ovl_samples = list(ovl_samples)
+
+    metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False)
+    groups = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col).subsets
     filtered_samples = pd.concat(list(groups.values()), ignore_index=True)[id_col].to_list()
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(filtered_samples)], columns=[])
     ll_cols = list(set(linelist_df.columns.to_list()))
@@ -447,6 +515,15 @@ def cluster_reporter(config):
     summary_df = pd.DataFrame.from_dict(summary_data, orient='index')
     cluster_display_cols_to_remove = list(set(cluster_display_cols_to_remove) & set(list(summary_df.columns)))
     summary_df = summary_df.drop(cluster_display_cols_to_remove, axis=1)
+    summary_cols = sorted(list(summary_df.columns))
+    display_columns = []
+    for col in cluster_summary_cols_properties:
+        display_columns.append(col)
+    for col in summary_cols:
+        if col in display_columns:
+            continue
+        display_columns.append(col)
+    summary_df = summary_df[display_columns]
     for k in cluster_display_cols_to_remove:
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
@@ -455,6 +532,9 @@ def cluster_reporter(config):
 
 
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
+
+    run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    sys.stdout.flush()
 
     with open(os.path.join(outdir, "run.json"), 'w') as fh:
         fh.write(json.dumps(run_data, indent=4))
@@ -475,15 +555,16 @@ def main():
     config_file = cmd_args.config
     count_missing = cmd_args.count_missing
     skip_qc = cmd_args.skip
-    num_threads = cmd_args.cpus
+    num_threads = cmd_args.n_threads
 
 
+    config = vars(cmd_args)
 
-
-    config = {}
     if config_file is not None:
         with open(config_file) as fh:
-            config = json.loads(fh.read())
+            c = json.loads(fh.read())
+            for field in c:
+                config[field] = c
 
     if not 'profile_file' in config:
         config['profile_file'] = profile_file
