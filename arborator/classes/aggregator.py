@@ -7,7 +7,7 @@ class summarizer:
     valid_types = [
         'categorical',
         'min_max',
-        'desc_stats'
+        'desc_stats',
         'none'
     ]
 
@@ -22,11 +22,20 @@ class summarizer:
 
     def get_fields(self,dictionary,field_data_types,field_name_key,field_name_value):
         output_fields = []
-
         for group_id in dictionary:
             m = dictionary[group_id][field_name_key]
             for col in m:
                 col_dtype = 'categorical'
+                c = col.split(' ')
+                if 'age' in c:
+                    col_dtype = 'desc_stats'
+                if 'date' in c:
+                    col_dtype = 'min_max'
+                c = col.split('_')
+                if 'age' in c:
+                    col_dtype = 'desc_stats'
+                if 'date' in c:
+                    col_dtype = 'min_max'
                 if col in field_data_types:
                     col_dtype = field_data_types[col]["data_type"]
                 if col_dtype not in self.valid_types:
@@ -37,12 +46,14 @@ class summarizer:
                     for value in values:
                         k = f"count_{col}_{value}"
                         output_fields.append(k)
+
                 elif col_dtype == 'min_max':
                     output_fields += [f'{col}_min_value',f'{col}_max_value']
                 elif col_dtype == 'desc_stats':
                     output_fields += [f'{col}_min_value', f'{col}_mean_value', f'{col}_median_value',f'{col}_max_value']
                 elif col_dtype == 'None':
                     output_fields.append(col)
+        output_fields = sorted(list(set(output_fields)))
         return output_fields
 
     def create_record(self,header,field_data_types):
@@ -117,8 +128,20 @@ class summarizer:
             for col in data:
                 col_dtype = 'categorical'
                 records[group_id][col] = ",".join(sorted([str(x) for x in list(data[col][field_name_value].keys())]))
-                if col in field_data_types and 'data_type' in field_data_types[col]:
-                    col_dtype = field_data_types[col]['data_type']
+                c = col.split(' ')
+                if 'age' in c:
+                    col_dtype = 'desc_stats'
+                if 'date' in c:
+                    col_dtype = 'min_max'
+                c = col.split('_')
+                if 'age' in c:
+                    col_dtype = 'desc_stats'
+                if 'date' in c:
+                    col_dtype = 'min_max'
+                
+                if col in field_data_types:
+                    if 'data_type' in field_data_types[col]:
+                        col_dtype = field_data_types[col]['data_type']
 
                 if col_dtype == 'categorical':
                     names = list(data[col][field_name_value].keys())
@@ -154,6 +177,7 @@ class summarizer:
                                 records[group_id][f'{col}_median_value'] = dstats['median']
                         else:
                             records[group_id][col] = data[col][field_name_value]
+
         return records
 
     def get_data(self):
