@@ -196,6 +196,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
     med_dist = 0
     max_dist = 0
     outliers = {}
+    outlier_ids = []
     metadata_summary = report(read_data(output_files['metadata']).df,[id_col,group_col]).get_data()
 
     if len(l) >= min_members:
