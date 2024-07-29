@@ -1,7 +1,14 @@
-id	outbreak	serovar	country	date	age	source
-S1	1	Enteritidis	Canada	2020-1-12	5	human
-S2	1	Enteritidis	United States	2020-7-1	79	chicken
-S3	2	Infantis	Canada	2023-5-17	10	human
-S4	2	Infantis	United States	2023-8-8	13	beef
-S5	3	Typhimurium	Canada	2022-3-6	87	human
-S6		London	Canada	2022-3-6	60	pig
+sample_id	country	state/province	organism	score	host	cluster_id
+A	Canada	Ontario	Salmonella enterica	1	chicken	1
+B	Canada	British Columbia	Salmonella enterica	1	chicken	1
+C	United States	New York	Salmonella enterica	1	chicken	2
+D	United States	California	Salmonella enterica	2	chicken	2
+E	Canada	Ontario	Salmonella enterica	3	chicken	3
+F	Canada	British Columbia	Salmonella enterica	4	human	3
+G	United States	New York	Salmonella enterica	5	human	4
+H	United States	New York	Salmonella enterica	2	human	4
+I	United Kingdom	England	Salmonella enterica	1	human	5
+J	United Kingdom	England	Salmonella enterica	1	human	5
+K	Austrailia	NSW	Salmonella enterica	1	human	1
+L	Austrailia	NSW	Salmonella enterica	1	chicken	1
+M	Austrailia	NSW	Salmonella enterica	1	human	1
