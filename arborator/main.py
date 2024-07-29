@@ -222,7 +222,13 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
 
         if os.path.isfile(output_files['clusters']) and os.path.isfile(output_files["metadata"]):
             clust_df = pd.read_csv(output_files['clusters'],sep="\t",header=0)
-            clust_df = clust_df.rename(columns={'id': id_col})
+            clust_df = clust_df[['id','address']]
+            values = clust_df['address']
+            for idx,value in enumerate(values):
+                values[idx] = f'{group_id}|{value}'
+            clust_df['address'] = values
+            clust_df = clust_df.rename(columns={'id': id_col,'address':'gas_denovo_cluster_address'})
+            clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)     
             metadata_df = pd.read_csv(output_files['metadata'],sep="\t",header=0)
             pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files['metadata'],sep="\t",header=True,index=False)
             del(clust_df)
@@ -488,12 +494,10 @@ def cluster_reporter(config):
                 t.append(c)
         line_list_columns = t
 
-    linelist_df = linelist_df[line_list_columns]
-    linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
-
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(list(set(metadata_df[id_col].to_list()) - set(filtered_samples)))], columns=[])
     linelist_df = linelist_df[line_list_columns]
     linelist_df.to_csv(os.path.join(outdir, "metadata.excluded.tsv"), sep="\t", header=True, index=False)
+    del(linelist_df)
 
     run_data['threshold_map'] = format_threshold_map(thresholds)
     with open(os.path.join(outdir,"threshold_map.json"),'w' ) as fh:
@@ -505,6 +509,8 @@ def cluster_reporter(config):
     for r in results:
         for k in r:
             group_metrics[k] = r[k]
+
+    #merge metadata files
 
     summary_file = os.path.join(outdir, "cluster_summary.tsv")
 
@@ -518,20 +524,41 @@ def cluster_reporter(config):
     summary_cols = sorted(list(summary_df.columns))
     display_columns = []
     for col in cluster_summary_cols_properties:
-        display_columns.append(col)
+        prop = cluster_summary_cols_properties[col]
+        if 'display' in prop:
+            if prop['display'] in ['true','True',True]:
+                display_columns.append(col)
+        else:
+            display_columns.append(col)
     for col in summary_cols:
         if col in display_columns:
             continue
         display_columns.append(col)
+        
     summary_df = summary_df[display_columns]
     for k in cluster_display_cols_to_remove:
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
-
-
-
-
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
+
+    if not restrict_output and 'gas_denovo_cluster_address' not in line_list_columns:
+        line_list_columns.append('gas_denovo_cluster_address')
+    
+    metadata_dfs = []
+    for group_id in group_files:
+        #remove parquet file
+        f = group_files[group_id]['parquet_matrix']
+        if os.path.isfile(f):
+            os.remove(f)
+        f = group_files[group_id][ "metadata"]
+        if os.path.isfile(f):
+            obj = read_data(f)
+            if obj.status:
+                metadata_dfs.append(obj.df)
+    
+    linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
+    linelist_df = linelist_df[line_list_columns]
+    linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
 
     run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     sys.stdout.flush()
@@ -564,8 +591,7 @@ def main():
         with open(config_file) as fh:
             c = json.loads(fh.read())
             for field in c:
-                config[field] = c
-
+                config[field] = c[field]
     if not 'profile_file' in config:
         config['profile_file'] = profile_file
 
