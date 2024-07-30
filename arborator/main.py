@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 import pandas as pd
 from statistics import mean, median
-
+import shutil
 from arborator.version import __version__
 from arborator.classes.aggregator import summarizer
 from profile_dists.utils import convert_profiles, calc_distances_hamming, process_profile
@@ -52,10 +52,10 @@ def parse_args():
     parser.add_argument('--config', '-c', type=str, required=False,
                         help='Configuration json')
     parser.add_argument('--outdir', '-o', type=str, required=True, help='Result output files')
-    parser.add_argument('--partition_col', '-a', type=str, required=True, help='Metadata column name for aggregating samples' )
-    parser.add_argument('--id_col', '-i', type=str, required=True, help='Sample identifier column' )
-    parser.add_argument('--outlier_thresh', type=float, required=True, help='Threshold to flag outlier comparisons within a group')
-    parser.add_argument('--min_cluster_members','-m', type=int, required=False,
+    parser.add_argument('--partition_col', '-a', type=str, required=False, help='Metadata column name for aggregating samples' )
+    parser.add_argument('--id_col', '-i', type=str, required=False, help='Sample identifier column' )
+    parser.add_argument('--outlier_thresh', type=float, required=False, help='Threshold to flag outlier comparisons within a group',default=100)
+    parser.add_argument('--min_members','-m', type=int, required=False,
                         help='Minimum number of members to perform clustering',default=2)
 
     #profile dists
@@ -64,10 +64,10 @@ def parse_args():
     parser.add_argument('--missing_thresh', type=float, required=False,
                         help='Maximum percentage of missing data allowed per locus (0 - 1)',default=1.0)
     parser.add_argument('--distm', type=str, required=False, help='Distance method raw hamming or scaled difference [hamming, scaled]',default='scaled')
-    parser.add_argument('-s', '--skip', required=False, help='Skip QA/QC steps',
+    parser.add_argument('-s', '--skip_qc', required=False, help='Skip QA/QC steps',
                         action='store_true')
     #GAS
-    parser.add_argument('-t','--thresholds', type=str, required=True, help='thresholds delimited by ,')
+    parser.add_argument('-t','--thresholds', type=str, required=False, help='thresholds delimited by ,',default='100')
     parser.add_argument('-d', '--delimeter', type=str, required=False, help='delimeter desired for nomenclature code',
                         default=".")
     parser.add_argument('-e', '--method', type=str, required=False, help='cluster method [single, complete, average]',
@@ -315,12 +315,23 @@ def update_column_order(df,col_properties,restrict=False):
 
     return df[list(cols.values())]
 
+def validate_params(config):
+    params = ['profile','metadata','outdir','id_col','partition_col','min_members']
+    missing = []
+    for p in params:
+        if p not in config or config[p] == '' or config[p] == None:
+            missing.append(p)
+    if len(missing) > 0:
+        print(f"Error, parameters not set for: {missing}")
+        sys.exit()
 
+    
 
 
 def cluster_reporter(config):
-    profile_file = config['profile_file']
-    partition_file = config['partition_file']
+    validate_params(config)
+    profile_file = config['profile']
+    partition_file = config['metadata']
     outdir = config['outdir']
     outlier_thresh = config['outlier_thresh']
     thresholds = config['thresholds']
@@ -330,7 +341,7 @@ def cluster_reporter(config):
     partition_col = config['partition_col']
     min_members = config['min_members']
     skip_qc = config['skip_qc']
-    num_threads = config['num_threads']
+    num_threads = config['n_threads']
 
     missing_thresh = config['missing_thresh']
     distm = config['distm']
@@ -452,6 +463,7 @@ def cluster_reporter(config):
         os.makedirs(outdir, 0o755)
 
     (allele_map, profile_df) = process_profile(profile_file, column_mapping={})
+    profile_df = profile_df.copy()
     profile_df.insert(0, id_col, profile_df.index.to_list())
 
     #write allele mapping file
@@ -542,12 +554,26 @@ def cluster_reporter(config):
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
 
+
+    
+    if "linelist_columns" in config:
+        line_list_columns = []
+        linelist_cols_properties = config["linelist_columns"]
+        for f in linelist_cols_properties:
+            if 'display' in linelist_cols_properties[f]:
+                v = linelist_cols_properties[f]['display'].lower()
+                if v in ['t','true']:
+                    line_list_columns.append(f)
+
     if not restrict_output and 'gas_denovo_cluster_address' not in line_list_columns:
         line_list_columns.append('gas_denovo_cluster_address')
     
+
     metadata_dfs = []
+
     for group_id in group_files:
         #remove parquet file
+        num_members = 0
         f = group_files[group_id]['parquet_matrix']
         if os.path.isfile(f):
             os.remove(f)
@@ -555,7 +581,11 @@ def cluster_reporter(config):
         if os.path.isfile(f):
             obj = read_data(f)
             if obj.status:
+                num_members = len(obj.df)
                 metadata_dfs.append(obj.df)
+        if num_members < min_members:
+            shutil.rmtree(os.path.join(outdir,group_id))
+
     
     linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
     linelist_df = linelist_df[line_list_columns]
@@ -570,22 +600,7 @@ def cluster_reporter(config):
 
 def main():
     cmd_args = parse_args()
-    profile_file = cmd_args.profile
-    partition_file = cmd_args.metadata
-    outdir = cmd_args.outdir
-    outlier_thresh = cmd_args.outlier_thresh
-    thresholds = cmd_args.thresholds
-    method = cmd_args.method
-    force = cmd_args.force
-    id_col = cmd_args.id_col
-    partition_col = cmd_args.partition_col
-    min_members = cmd_args.min_cluster_members
     config_file = cmd_args.config
-    count_missing = cmd_args.count_missing
-    skip_qc = cmd_args.skip
-    num_threads = cmd_args.n_threads
-
-
     config = vars(cmd_args)
 
     if config_file is not None:
@@ -593,44 +608,16 @@ def main():
             c = json.loads(fh.read())
             for field in c:
                 config[field] = c[field]
-    if not 'profile_file' in config:
-        config['profile_file'] = profile_file
+    
 
-    if not 'partition_file' in config:
-        config['partition_file'] = partition_file
+    if not 'outlier_thresh' in config or config['outlier_thresh'] == '':
+        print(f'Error you must supply an outlier threshold as a cmd line parameter or in the config file')
+        sys.exit()
 
-    if not 'outdir' in config:
-        config['outdir'] = outdir
+    if not 'thresholds' in config or config['thresholds'] == '':
+        print(f'Error you ust supply a threshold as a cmd line parameter or in the config file')
+        sys.exit()
 
-    if not 'outlier_thresh' in config:
-        config['outlier_thresh'] = outlier_thresh
-
-    if not 'thresholds' in config:
-        config['thresholds'] = thresholds
-
-    if not 'method' in config:
-        config['method'] = method
-
-    if not 'force' in config:
-        config['force'] = force
-
-    if not 'id_col' in config:
-        config['id_col'] = id_col
-
-    if not 'partition_col' in config:
-        config['partition_col'] = partition_col
-
-    if not 'min_members' in config:
-        config['min_members'] = min_members
-
-    if not 'count_missing' in config:
-        config['count_missing'] = count_missing
-
-    if not 'skip_qc' in config:
-        config['skip_qc'] = skip_qc
-
-    if not 'num_threads' in config:
-        config['num_threads'] = num_threads
 
     cluster_reporter(config)
 
