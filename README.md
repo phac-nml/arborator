@@ -63,19 +63,18 @@ Install the latest master branch version directly from Github:
 ### Compatibility
 
 The following tools and dependencies should be installed by the conda environment:
-- GAS
-- Profile_dists
-        'pyarrow==12.0.0',
-        'fastparquet==2023.4.0',
-        'numba==0.57.1',
-        'numpy==1.24.4',
-        'tables==3.8.0',
-        'six>=1.16.0',
-        'pandas==2.0.2 ',
-        'psutil',
-        'scipy',
-        'profile_dists',
-        'genomic_address_service'
+
+- pyarrow==12.0.0
+- fastparquet==2023.4.0'
+- numba==0.57.1
+- numpy==1.24.4
+- tables==3.8.0
+- six>=1.16.0
+- pandas==2.0.2 
+- psutil
+- scipy'
+- profile_dists
+- genomic_address_service
 
 # Getting Started
 
