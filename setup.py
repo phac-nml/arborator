@@ -52,15 +52,15 @@ setup(
     install_requires=[
         'pyarrow>=14.0.0',
         'fastparquet==2023.4.0',
-        'numba>=0.59.1,<=0.61.2',
-        'numpy>=1.26.4,<2.0.0',
-        'tables>=3.9.1',
+        'numba>=0.57.1,<=0.61.2',
+        'numpy>=1.24.4,<2.0.0',
+        'tables>=3.8.0',
         'six>=1.16.0',
         'pandas>=2.0.2,<2.2.0',
         'psutil',
         'scipy',
-        'profile_dists>=1.0.5',
-        'genomic_address_service>=0.2.0'
+        'profile_dists',
+        'genomic_address_service'
 
     ],
 
