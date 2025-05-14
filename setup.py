@@ -30,7 +30,7 @@ setup(
     name='arborator',
     include_package_data=True,
     version=__version__,
-    python_requires='>=3.8.2,<3.10',
+    python_requires='>=3.8.2,<3.12',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=find_packages(exclude=['tests']),
