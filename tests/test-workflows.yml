@@ -1,0 +1,26 @@
+- name: Test help message
+  command: arborator --help
+
+- name: Basic arborator test
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --id_col id --partition_col outbreak --thresholds 10,9,8,7,6,5,4,3,2,1
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
