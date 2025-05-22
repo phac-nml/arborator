@@ -1,4 +1,4 @@
-![alt text](https://github.com/phac-nml/arborator/blob/master/logo.png?raw=true)
+![alt text](https://github.com/phac-nml/arborator/blob/main/logo.png?raw=true)
 
 [![PyPI](https://img.shields.io/badge/Install%20with-PyPI-blue)](https://pypi.org/project/arborator/#description)
 [![Bioconda](https://img.shields.io/badge/Install%20with-bioconda-green)](https://anaconda.org/bioconda/arborator)
@@ -56,7 +56,7 @@ Install using pip:
 
         pip install arborator
 
-Install the latest master branch version directly from Github:
+Install the latest main branch version directly from Github:
 
         pip install git+https://github.com/phac-nml/arborator.git*
 
@@ -96,7 +96,7 @@ Run the test dataset using the data included in the repository under test_data
 
     arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --id_col id --partition_col outbreak --thresholds 10,9,8,7,6,5,4,3,2,1
 
-![alt text](https://github.com/phac-nml/arborator/blob/master/ArboratorWorkflow.png?raw=true)
+![alt text](https://github.com/phac-nml/arborator/blob/main/ArboratorWorkflow.png?raw=true)
 ## Configuration and Settings
 There are a large number of parameters to configure within Arborator. 
 
