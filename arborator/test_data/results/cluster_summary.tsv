@@ -1,4 +1,0 @@
-National Outbreak Code	Patient Age (years)	serovar	Source Type	count_outliers	count_serovar_Typhimurium	date_min_value	count_source_beef	median_dist	count_age_87	count_serovar_Infantis	age_max_value	count_country_Canada	date_max_value	count_serovar_Enteritidis	mean_dist	count_age_10	min_dist	age_min_value	count_source_chicken	count_source_human	count_country_United States	count_age_13	age_median_value	age_mean_value	count_age_5	max_dist	count_age_79	count_members
-1.0	5,79	2020-1-12,2020-7-1	chicken,human	0	0	2020-01-12	0	3.0	0	0	79.0	1	2020-07-01	2	3.0	0	3.0	5.0	1	1	1	0	42.0	42.0	0	3.0	0	2
-2.0	10,13	2023-5-17,2023-8-8	beef,human	0	0	2023-05-17	1	2.0	0	2	13.0	1	2023-08-08	0	2.0	0	2.0	10.0	0	1	1	0	11.5	11.5	0	2.0	0	2
-3.0	87	2022-3-6	human	0	1	2022-03-06	0	0	0	0	87.0	1	2022-03-06	0	0	0	0	87.0	0	1	0	0	87.0	87.0	0	0	0	1
