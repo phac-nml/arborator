@@ -15,6 +15,8 @@ Topic :: Scientific/Engineering :: Bio-Informatics
 Programming Language :: Python
 Programming Language :: Python :: 3.8
 Programming Language :: Python :: 3.9
+Programming Language :: Python :: 3.10
+Programming Language :: Python :: 3.11
 Programming Language :: Python :: Implementation :: CPython
 Operating System :: POSIX :: Linux
 """.strip().split('\n')
@@ -30,7 +32,7 @@ setup(
     name='arborator',
     include_package_data=True,
     version=__version__,
-    python_requires='>=3.8.2,<3.10',
+    python_requires='>=3.8.2,<3.12',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     packages=find_packages(exclude=['tests']),
@@ -48,13 +50,13 @@ setup(
     },
 
     install_requires=[
-        'pyarrow==12.0.0',
-        'fastparquet==2023.4.0',
-        'numba==0.57.1',
-        'numpy==1.24.4',
-        'tables==3.8.0',
+        'pyarrow>=14.0.0',
+        'fastparquet>=2023.4.0',
+        'numba>=0.57.1,<=0.61.2',
+        'numpy>=1.24.4,<2.0.0',
+        'tables>=3.8.0',
         'six>=1.16.0',
-        'pandas==2.0.2 ',
+        'pandas>=2.0.2,<2.2.0',
         'psutil',
         'scipy',
         'profile_dists',

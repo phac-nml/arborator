@@ -1,6 +1,0 @@
-outbreak	country	serovar	age	date	source	id
-1.0	Canada	Enteritidis	5	2020-1-12	human	S1
-1.0	United States	Enteritidis	79	2020-7-1	chicken	S2
-2.0	Canada	Infantis	10	2023-5-17	human	S3
-2.0	United States	Infantis	13	2023-8-8	beef	S4
-3.0	Canada	Typhimurium	87	2022-3-6	human	S5
