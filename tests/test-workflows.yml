@@ -147,3 +147,13 @@
   stderr:
     contains:
       - "thresholds ['1', '1', '1'] must be in decreasing order"
+
+- name: Test Exception Handling - Non-Numeric thresholds
+  tags:
+    - exception
+    - exception_non_numeric_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 1,a,b
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['1', 'a', 'b'] must all be integers or floats"
