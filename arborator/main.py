@@ -330,11 +330,13 @@ def validate_params(config):
 
 def cluster_reporter(config):
     validate_params(config)
+    print("config = " + str(config))
     profile_file = config['profile']
     partition_file = config['metadata']
     outdir = config['outdir']
     outlier_thresh = config['outlier_thresh']
     thresholds = config['thresholds']
+    print("thresholds = " + str(thresholds))
     method = config['method']
     force = config['force']
     id_col = config['id_col']
