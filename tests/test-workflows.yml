@@ -11,6 +11,90 @@
         - "host"
     - path: "results/1/clusters.tsv"
       contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"clustering_method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Test Config File Overwrites Command Line Argument - thresholds
+  tags:
+    - config_overwrites_command_line
+    - config_overwrites_command_line_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  files:
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Test Command Line Argument Used When Parameter Not in Config - thresholds
+  tags:
+    - command_line_argument_used
+    - command_line_argument_used_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
         - "gas_denovo_cluster_address"
         - "A\t1|1.1.1.1.1.1.1.1.1.1"
         - "B\t1|1.1.1.1.1.1.1.1.1.1"
@@ -43,79 +127,3 @@
         - '"id_col": "sample_id"'
         - '"clustering_method": "average"'
         - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
-
-- name: Test Command-Line Parameter Overwrites Config - thresholds
-  tags:
-    - command_line_overwrites_config
-    - command_line_overwrites_config_thresholds
-  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
-  files:
-    - path: "results/1/clusters.tsv"
-      contains:
-        - "gas_denovo_cluster_address"
-        - "A\t1|1.1.1.1.1.1.1.1.1.1"
-        - "B\t1|1.1.1.1.1.1.1.1.1.1"
-        - "K\t1|1.1.1.1.1.1.1.1.1.2"
-        - "L\t1|1.1.1.1.1.1.1.1.1.2"
-        - "M\t1|1.1.1.1.1.1.1.1.1.1"
-    - path: "results/2/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "C\t2|1.1.1.1.1.1.1.1.1.1"
-        - "D\t2|1.1.1.1.1.1.1.1.1.1"
-    - path: "results/3/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "E\t3|1.1.1.1.1.1.1.1.1.1"
-        - "F\t3|1.1.1.1.1.1.1.1.1.1"
-    - path: "results/4/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "G\t4|1.1.1.1.1.1.1.1.1.1"
-        - "H\t4|1.1.1.1.1.1.1.1.1.1"
-    - path: "results/5/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "I\t5|1.1.1.1.1.1.1.1.1.1"
-        - "J\t5|1.1.1.1.1.1.1.1.1.1"
-    - path: "results/run.json"
-      contains:
-        - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
-
-- name: Test Config Parameter Used - thresholds
-  tags:
-    - config_parameter_used
-    - config_parameter_used_thresholds
-  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results
-  files:
-    - path: "results/1/clusters.tsv"
-      contains:
-        - "gas_denovo_cluster_address"
-        - "A\t1|1.1.1.1.1"
-        - "B\t1|1.1.1.1.2"
-        - "K\t1|1.1.1.2.3"
-        - "L\t1|1.1.1.2.4"
-        - "M\t1|1.1.1.1.1"
-    - path: "results/2/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "C\t2|1.1.1.1.1"
-        - "D\t2|1.1.1.1.2"
-    - path: "results/3/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "E\t3|1.1.1.1.1"
-        - "F\t3|1.1.1.1.2"
-    - path: "results/4/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "G\t4|1.1.1.1.1"
-        - "H\t4|1.1.1.1.2"
-    - path: "results/5/clusters.tsv"
-      contains:
-        - "sample_id\tgas_denovo_cluster_address"
-        - "I\t5|1.1.1.1.1"
-        - "J\t5|1.1.1.1.2"
-    - path: "results/run.json"
-      contains:
-        - '"thresholds": "10,5,2,1,0"'
