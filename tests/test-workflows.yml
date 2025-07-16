@@ -127,3 +127,23 @@
         - '"id_col": "sample_id"'
         - '"clustering_method": "average"'
         - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
+
+- name: Test Exception Handling - Increasing thresholds
+  tags:
+    - exception
+    - exception_increasing_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 1,2,3
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['1', '2', '3'] must be in decreasing order"
+
+- name: Test Exception Handling - Non-Decreasing thresholds
+  tags:
+    - exception
+    - exception_non_decreasing_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 1,1,1
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['1', '1', '1'] must be in decreasing order"

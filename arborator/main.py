@@ -427,11 +427,7 @@ def cluster_reporter(config):
     if not isinstance(thresholds,list):
         thresholds = thresholds.split(',')
 
-    try:
-        thresholds = [float(x) for x in thresholds]
-    except:
-        print(f'Thresholds needs to be numeric and delineated by comma {thresholds}')
-        sys.exit()
+    thresholds = process_thresholds(thresholds)
 
     if not isinstance(force, bool):
         if force.lower() in ['f','false']:
@@ -597,18 +593,34 @@ def cluster_reporter(config):
     with open(os.path.join(outdir, "run.json"), 'w') as fh:
         fh.write(json.dumps(run_data, indent=4))
 
+def process_thresholds(thresholds):
+
+    try:
+        processed = [float(x) for x in thresholds]
+    except ValueError:
+        message = f'thresholds {thresholds} must all be integers or floats'
+        raise Exception(message)
+
+    # Thresholds must be strictly decreasing:
+    if not all(processed[i] > processed[i+1] for i in range(len(processed)-1)):
+        message = f'thresholds {thresholds} must be in decreasing order'
+        raise Exception(message)
+
+    return processed
 
 def main():
     cmd_args = parse_args()
     config_file = cmd_args.config
+
+    # Initialize based on argparse (command-line arguments):
     config = vars(cmd_args)
 
+    # Overwrite with config file parameters:
     if config_file is not None:
         with open(config_file) as fh:
             c = json.loads(fh.read())
             for field in c:
                 config[field] = c[field]
-    
 
     if not 'outlier_thresh' in config or config['outlier_thresh'] == '':
         print(f'Error you must supply an outlier threshold as a cmd line parameter or in the config file')
