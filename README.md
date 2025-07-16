@@ -120,7 +120,9 @@ The parameters are explained as follows:
 - `-V` prints version string
 
 
-To enable consistency, we accept a configuration json object that allows the user to specify operations for summarizing columns, and configured report templates. Users can setup specific configurations for each of their target organisms of interest and use the config file as input to arborator for routine operations.
+To enable consistency, we accept a configuration JSON object that allows the user to specify operations for summarizing columns, and configured report templates. Users can setup specific configurations for each of their target organisms of interest and use the config file as input to arborator for routine operations.
+
+**Parameters specified in the JSON-formatted config file will always overwrite command-line arguments provided to the program.**
 
 ### Example config file
 ```
