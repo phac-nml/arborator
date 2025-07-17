@@ -637,7 +637,7 @@ def main():
         sys.exit()
 
     if not 'thresholds' in config or config['thresholds'] == '':
-        print(f'Error you ust supply a threshold as a cmd line parameter or in the config file')
+        print(f'Error you must supply a threshold as a cmd line parameter or in the config file')
         sys.exit()
 
 
