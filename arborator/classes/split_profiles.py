@@ -1,11 +1,6 @@
 from arborator.classes.read_data import read_data
 
 class split_profiles:
-    partition_file = None
-    partitions = None
-    groups = None
-    subsets = {}
-    df = None
 
     def __init__(self,df,partition_file,id_col,partition_col):
         self.df = df
