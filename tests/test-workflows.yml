@@ -208,12 +208,22 @@
     contains:
       - "the partition column does_not_exist does not exist in the data"
 
-- name: Test Exception Handling - partition_col Not Specified
+- name: Test Error Handling - partition_col Not Specified
   tags:
-    - exception
-    - exception_parition_not_specified
+    - error
+    - error_parition_not_specified
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_partition.json --outdir results
   exit_code: 0
   stdout:
     contains:
       - "Error, parameters not set for: ['partition_col']"
+
+- name: Test Error Handling - Multiple Parameters Not Specified
+  tags:
+    - error
+    - error_multiple_parameters_not_specified
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_missing_multiple_parameters.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - "Error, parameters not set for: ['id_col', 'partition_col']"
