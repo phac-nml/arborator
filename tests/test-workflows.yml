@@ -157,3 +157,43 @@
   stderr:
     contains:
       - "thresholds ['1', 'a', 'b'] must all be integers or floats"
+
+- name: Test Exception Handling - Negative thresholds
+  tags:
+    - exception
+    - exception_negative_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 3,2,-1
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['3', '2', '-1'] must be non-negative"
+
+- name: Test File Handling - Missing profile
+  tags:
+    - file_handling
+    - file_handling_missing_profile
+  command: arborator --profile tests/data/profile_file_does_not_exist.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - "Profile path tests/data/profile_file_does_not_exist.tsv does not exist, please check path and try again"
+
+- name: Test File Handling - Missing metadata
+  tags:
+    - file_handling
+    - file_handling_missing_metadata
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_file_does_not_exist.tsv --config tests/data/config.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - "Metadata file tests/data/metadata_file_does_not_exist.tsv does not exist, please check path and try again"
+
+- name: Test File Handling - Missing config
+  tags:
+    - file_handling
+    - file_handling_missing_config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_file_does_not_exist.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - "Config path tests/data/config_file_does_not_exist.json does not exist, please check path and try again"

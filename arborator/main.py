@@ -606,6 +606,11 @@ def process_thresholds(thresholds):
         message = f'thresholds {thresholds} must be in decreasing order'
         raise Exception(message)
 
+    # Thresholds must be non-negative:
+    if not all(processed[i] >= 0 for i in range(len(processed))):
+        message = f'thresholds {thresholds} must be non-negative'
+        raise Exception(message)
+
     return processed
 
 def main():
@@ -617,6 +622,11 @@ def main():
 
     # Overwrite with config file parameters:
     if config_file is not None:
+
+        if not os.path.isfile(config_file):
+            print(f'Config path {config_file} does not exist, please check path and try again')
+            sys.exit()
+
         with open(config_file) as fh:
             c = json.loads(fh.read())
             for field in c:
