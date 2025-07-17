@@ -128,7 +128,7 @@ To enable consistency, we accept a configuration JSON object that allows the use
 ```
     {
         "outlier_thresh": "25",
-        "clustering_method": "average",
+        "method": "average",
         "thresholds": "500,100,75,50,25,15,10,5,2,1,0",
         "min_cluster_members": 2,
         "partition_column_name": "outbreak",

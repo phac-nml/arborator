@@ -1,6 +1,6 @@
     {
         "outlier_thresh": "25",
-        "clustering_method": "average",
+        "method": "average",
         "min_cluster_members": 2,
         "partition_col": "cluster_id",
         "id_col": "sample_id",

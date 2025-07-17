@@ -41,7 +41,7 @@
       contains:
         - '"partition_col": "cluster_id"'
         - '"id_col": "sample_id"'
-        - '"clustering_method": "average"'
+        - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
 
 - name: Test Config File Overwrites Command Line Argument - thresholds
@@ -125,7 +125,7 @@
       contains:
         - '"partition_col": "cluster_id"'
         - '"id_col": "sample_id"'
-        - '"clustering_method": "average"'
+        - '"method": "average"'
         - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
 
 - name: Test Exception Handling - Increasing thresholds
@@ -227,3 +227,49 @@
   stdout:
     contains:
       - "Error, parameters not set for: ['id_col', 'partition_col']"
+
+- name: Test Specifying Parameters on Command-Line
+  tags:
+    - specify_parameters_on_command_line
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id --skip_qc
+  exit_code: 0
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'

@@ -347,7 +347,6 @@ def cluster_reporter(config):
     distm = config['distm']
     count_missing = config['count_missing']
     delimeter = config['delimeter']
-
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
