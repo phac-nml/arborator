@@ -197,3 +197,13 @@
   stdout:
     contains:
       - "Config path tests/data/config_file_does_not_exist.json does not exist, please check path and try again"
+
+- name: Test Exception Handling - partition_col Does Not Exist
+  tags:
+    - exception
+    - exception_parition_does_not_exist
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_bad_partition.json --outdir results --thresholds 3,2,1
+  exit_code: 1
+  stderr:
+    contains:
+      - "the partition column does_not_exist does not exist in the data"

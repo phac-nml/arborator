@@ -14,9 +14,14 @@ class split_profiles:
 
     def parse_partition_file(self,id_col,partition_col):
         partition = read_data(self.partition_file)
-        df = partition.df.dropna(subset=[partition_col])
-        self.partitions = dict(zip(df[id_col].values.tolist(), df[partition_col].values.tolist()))
+        data_frame = partition.df
 
+        if partition_col not in data_frame:
+            message = f'the partition column {partition_col} does not exist in the data'
+            raise Exception(message)
+
+        data_frame = data_frame.dropna(subset=[partition_col])
+        self.partitions = dict(zip(data_frame[id_col].values.tolist(), data_frame[partition_col].values.tolist()))
 
     def create_groups(self):
         self.groups = {}
