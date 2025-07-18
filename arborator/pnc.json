@@ -2,11 +2,11 @@
 	"outlier_thresh": "25",
 	"method": "average",
 	"thresholds": "500,100,75,50,25,15,10,5,2,1,0",
-	"min_cluster_members": 2,
-	"partition_column_name": "Outbreak",
-	"id_column_name": "sample_id",
+	"min_members": 2,
+	"partition_col": "Outbreak",
+	"id_col": "sample_id",
 	"only_report_labeled_columns": "False",
-	"skip_qa": "False",
+	"skip_qc": "False",
 
 	"grouped_metadata_columns":{
 		"Outbreak":{ "data_type": "None","label":"Outbreak","default":"","display":"True"},

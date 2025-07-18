@@ -39,9 +39,11 @@ and contextual metadata and perform:
 1) Splitting a large target collection of samples into individual profile and metadata files
 2) Calculating within group genetic diversity statistics, generating dendrograms along with flat clusters based on thresholds, outlier detection, and loci summary reports 
 3) Summarized report across all analyzed groups
+
 ## Citation
 
 Robertson, James, Wells, Matthew, Schonfeld, Justin, Reimer, Aleisha. Arborator: Streamlining public health pathogen outbreak and surveillance operations. 2024. https://github.com/phac-nml/arborator
+
 ## Contact
 
 **James Robertson**: james.robertson@phac-aspc.gc.ca
@@ -65,14 +67,14 @@ Install the latest main branch version directly from Github:
 The following tools and dependencies should be installed by the conda environment:
 
 - pyarrow==12.0.0
-- fastparquet==2023.4.0'
+- fastparquet==2023.4.0
 - numba==0.57.1
 - numpy==1.24.4
 - tables==3.8.0
 - six>=1.16.0
 - pandas==2.0.2 
 - psutil
-- scipy'
+- scipy
 - profile_dists
 - genomic_address_service
 
@@ -82,13 +84,13 @@ The following tools and dependencies should be installed by the conda environmen
 
 If you run ``arborator``, you should see the following usage statement:
 
-    usage: arborator [-h] --profile PROFILE --metadata METADATA
-                     [--config CONFIG] --outdir OUTDIR --partition_col
-                     PARTITION_COL --id_col ID_COL
-                     [--outlier_thresh OUTLIER_THRESH]
-                     [--min_cluster_members MIN_CLUSTER_MEMBERS] [-n] [-s]
-                     [--missing_thresh MISSING_THRESH] -t THRESHOLDS
-                     [-d DELIMETER] [-e METHOD] [--force] [--cpus CPUS] [-V]*
+```
+usage: arborator [-h] --profile PROFILE --metadata METADATA [--config CONFIG] --outdir OUTDIR
+                 [--partition_col PARTITION_COL] [--id_col ID_COL] [--outlier_thresh OUTLIER_THRESH]
+                 [--min_members MIN_MEMBERS] [--only_report_labeled_columns] [--count_missing]
+                 [--missing_thresh MISSING_THRESH] [--distm DISTM] [--skip_qc] [--thresholds THRESHOLDS]
+                 [--delimeter DELIMETER] [--method METHOD] [--force] [--n_threads N_THREADS] [--version]
+```
 
 ## Quick Start
 
@@ -101,24 +103,22 @@ Run the test dataset using the data included in the repository under test_data
 There are a large number of parameters to configure within Arborator. 
 
 The parameters are explained as follows:
-- `--profile` location of profile.tsv
-- `--metadata` location of metadata.tsv
-- `--config` (optional) location of config.json
-- `--outdir` designated output folder 
-- `--partition_col` name of column to partition data 
-- `--id_col` name of column with sample IDs
-- `--outlier_thresh` integer value to designate outliers
-- `--min_cluster_members` minimum number of samples to designate a cluster
-- `-n` (`--count_missing`) Count missing alleles (0s) as differences
-- `-s` (`--skip_qc`) Skip QA/QC steps
-- `--missing_thresh` Maximum percentage of missing data allowed per locus (0 - 1)
-- `-t` vector of threshold levels for clustering
-- `-d` delimiter separating clustering threshold vector
-- `-e` clustering method
-- `--force` overwrite existing output results
-- `--cpus` indicates numbers of cpus to use with multithreading
-- `-V` prints version string
-
+- `--profile` (`-p`): location of profile.tsv
+- `--metadata` (`-r`): location of metadata.tsv
+- `--config` (`-c`): location of config.json
+- `--outdir` (`-o`): designated output folder
+- `--partition_col` (`-a`): name of column to partition data
+- `--id_col` (`-i`): name of column with sample IDs
+- `--outlier_thresh`: integer value to designate outliers
+- `--min_members` (`-m`): minimum number of samples to designate a cluster
+- `--count_missing` (`-n`): Count missing alleles (0s) as differences
+- `--skip_qc` (`-s`): Skip QA/QC steps
+- `--missing_thresh`: Maximum percentage of missing data allowed per locus (0 - 1)
+- `--thresholds` (`t`): vector of threshold levels for clustering
+- `--method` (`-e`): clustering method
+- `--force` (`-f`): overwrite existing output results
+- `--n_threads`: indicates numbers of threads to use with multithreading
+- `--version` (`-V`): prints version string
 
 To enable consistency, we accept a configuration JSON object that allows the user to specify operations for summarizing columns, and configured report templates. Users can setup specific configurations for each of their target organisms of interest and use the config file as input to arborator for routine operations.
 
@@ -130,11 +130,11 @@ To enable consistency, we accept a configuration JSON object that allows the use
         "outlier_thresh": "25",
         "method": "average",
         "thresholds": "500,100,75,50,25,15,10,5,2,1,0",
-        "min_cluster_members": 2,
-        "partition_column_name": "outbreak",
-        "id_column_name": "sample_id",
+        "min_members": 2,
+        "partition_col": "outbreak",
+        "id_col": "sample_id",
         "only_report_labeled_columns": "False",
-        "skip_qa": "False",
+        "skip_qc": "False",
         
         #Used to configure the order and opperations of columns in the grouped summary (optional)
         "grouped_metadata_columns":{ 

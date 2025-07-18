@@ -18,6 +18,78 @@ from genomic_address_service.mcluster import write_clusters
 import fastparquet as pq
 from multiprocessing import Pool, cpu_count
 
+# ARGUMENTS
+PROFILE_KEY = "profile"
+PROFILE_LONG = "--" + PROFILE_KEY
+PROFILE_SHORT = "-p"
+
+METADATA_KEY = "metadata"
+METADATA_LONG = "--" + METADATA_KEY
+METADATA_SHORT = "-r"
+
+CONFIG_KEY = "config"
+CONFIG_LONG = "--" + CONFIG_KEY
+CONFIG_SHORT = "-c"
+
+OUTDIR_KEY = "outdir"
+OUTDIR_LONG = "--" + OUTDIR_KEY
+OUTDIR_SHORT = "-o"
+
+PARTITION_COLUMN_KEY = "partition_col"
+PARTITION_COLUMN_LONG = "--" + PARTITION_COLUMN_KEY
+PARTITION_COLUMN_SHORT = "-a"
+
+ID_COLUMN_KEY = "id_col"
+ID_COLUMN_LONG = "--" + ID_COLUMN_KEY
+ID_COLUMN_SHORT = "-i"
+
+OUTLIER_THRESHOLD_KEY = "outlier_thresh"
+OUTLIER_THRESHOLD_LONG = "--" + OUTLIER_THRESHOLD_KEY
+
+MINIMUM_MEMBERS_KEY = "min_members"
+MINIMUM_MEMBERS_LONG= "--" + MINIMUM_MEMBERS_KEY
+MINIMUM_MEMBERS_SHORT = "-m"
+
+COUNT_MISSING_KEY = "count_missing"
+COUNT_MISSING_LONG = "--" + COUNT_MISSING_KEY
+COUNT_MISSING_SHORT = "-n"
+
+MISSING_THRESHOLD_KEY = "missing_thresh"
+MISSING_THRESHOLD_LONG = "--" + MISSING_THRESHOLD_KEY
+
+DISTANCE_METHOD_KEY = "distm"
+DISTANCE_METHOD_LONG = "--" + DISTANCE_METHOD_KEY
+
+SKIP_QC_KEY = "skip_qc"
+SKIP_QC_LONG = "--" + SKIP_QC_KEY
+SKIP_QC_SHORT = "-s"
+
+THRESHOLDS_KEY = "thresholds"
+THRESHOLDS_LONG = "--" + THRESHOLDS_KEY
+THRESHOLDS_SHORT = "-t"
+
+DELIMETER_KEY = "delimeter"
+DELIMETER_LONG = "--" + DELIMETER_KEY
+DELIMETER_SHORT = "-d"
+
+CLUSTER_METHOD_KEY = "method"
+CLUSTER_METHOD_LONG = "--" + CLUSTER_METHOD_KEY
+CLUSTER_METHOD_SHORT = "-e"
+
+FORCE_KEY = "force"
+FORCE_LONG = "--" + FORCE_KEY
+FORCE_SHORT = "-f"
+
+THREADS_KEY = "n_threads"
+THREADS_LONG = "--" + THREADS_KEY
+
+VERSION_KEY = "version"
+VERSION_LONG = "--" + VERSION_KEY
+VERSION_SHORT = "-V"
+
+ONLY_REPORT_LABELED_KEY = "only_report_labeled_columns"
+ONLY_REPORT_LABELED_LONG = "--" + ONLY_REPORT_LABELED_KEY
+
 def parse_args():
     """ Argument Parsing method.
 
@@ -47,37 +119,39 @@ def parse_args():
     parser = ArgumentParser(
         description="Arborator, an aggregate tool for producing summary reports of genetic distances within groups v. {}".format(__version__),
         formatter_class=CustomFormatter)
-    parser.add_argument('--profile','-p', type=str, required=True, help='Allelic profiles')
-    parser.add_argument('--metadata','-r', type=str, required=True, help='Matched metadata for samples in the allele profile')
-    parser.add_argument('--config', '-c', type=str, required=False,
+    parser.add_argument(PROFILE_LONG, PROFILE_SHORT, type=str, required=True, help='Allelic profiles')
+    parser.add_argument(METADATA_LONG, METADATA_SHORT, type=str, required=True, help='Matched metadata for samples in the allele profile')
+    parser.add_argument(CONFIG_LONG, CONFIG_SHORT, type=str, required=False,
                         help='Configuration json')
-    parser.add_argument('--outdir', '-o', type=str, required=True, help='Result output files')
-    parser.add_argument('--partition_col', '-a', type=str, required=False, help='Metadata column name for aggregating samples' )
-    parser.add_argument('--id_col', '-i', type=str, required=False, help='Sample identifier column' )
-    parser.add_argument('--outlier_thresh', type=float, required=False, help='Threshold to flag outlier comparisons within a group',default=100)
-    parser.add_argument('--min_members','-m', type=int, required=False,
+    parser.add_argument(OUTDIR_LONG, OUTDIR_SHORT, type=str, required=True, help='Result output files')
+    parser.add_argument(PARTITION_COLUMN_LONG, PARTITION_COLUMN_SHORT, type=str, required=False, help='Metadata column name for aggregating samples' )
+    parser.add_argument(ID_COLUMN_LONG, ID_COLUMN_SHORT, type=str, required=False, help='Sample identifier column' )
+    parser.add_argument(OUTLIER_THRESHOLD_LONG, type=float, required=False, help='Threshold to flag outlier comparisons within a group',default=100)
+    parser.add_argument(MINIMUM_MEMBERS_LONG, MINIMUM_MEMBERS_SHORT, type=int, required=False,
                         help='Minimum number of members to perform clustering',default=2)
+    parser.add_argument(ONLY_REPORT_LABELED_LONG, required=False, help='Only report labeled columns',
+                        action='store_true')
 
     #profile dists
-    parser.add_argument('-n', '--count_missing', required=False, help='Count missing as differences',
+    parser.add_argument(COUNT_MISSING_LONG, COUNT_MISSING_SHORT, required=False, help='Count missing as differences',
                         action='store_true')
-    parser.add_argument('--missing_thresh', type=float, required=False,
+    parser.add_argument(MISSING_THRESHOLD_LONG, type=float, required=False,
                         help='Maximum percentage of missing data allowed per locus (0 - 1)',default=1.0)
-    parser.add_argument('--distm', type=str, required=False, help='Distance method raw hamming or scaled difference [hamming, scaled]',default='scaled')
-    parser.add_argument('-s', '--skip_qc', required=False, help='Skip QA/QC steps',
+    parser.add_argument(DISTANCE_METHOD_LONG, type=str, required=False, help='Distance method raw hamming or scaled difference [hamming, scaled]',default='scaled')
+    parser.add_argument(SKIP_QC_LONG, SKIP_QC_SHORT, required=False, help='Skip QA/QC steps',
                         action='store_true')
     #GAS
-    parser.add_argument('-t','--thresholds', type=str, required=False, help='thresholds delimited by ,',default='100')
-    parser.add_argument('-d', '--delimeter', type=str, required=False, help='delimeter desired for nomenclature code',
+    parser.add_argument(THRESHOLDS_LONG, THRESHOLDS_SHORT, type=str, required=False, help='thresholds delimited by ,',default='100')
+    parser.add_argument(DELIMETER_LONG, DELIMETER_SHORT, type=str, required=False, help='delimeter desired for nomenclature code',
                         default=".")
-    parser.add_argument('-e', '--method', type=str, required=False, help='cluster method [single, complete, average]',
+    parser.add_argument(CLUSTER_METHOD_LONG, CLUSTER_METHOD_SHORT, type=str, required=False, help='cluster method [single, complete, average]',
                         default='average')
 
-    parser.add_argument('--force','-f', required=False, help='Overwrite existing directory',
+    parser.add_argument(FORCE_LONG, FORCE_SHORT, required=False, help='Overwrite existing directory',
                         action='store_true')
-    parser.add_argument('--n_threads', type=int, required=False,
+    parser.add_argument(THREADS_LONG, type=int, required=False,
                         help='CPU Threads to use', default=1)
-    parser.add_argument('-V', '--version', action='version', version="%(prog)s " + __version__)
+    parser.add_argument(VERSION_LONG, VERSION_SHORT, action='version', version="%(prog)s " + __version__)
 
     return parser.parse_args()
 
@@ -316,7 +390,7 @@ def update_column_order(df,col_properties,restrict=False):
     return df[list(cols.values())]
 
 def validate_params(config):
-    params = ['profile','metadata','outdir','id_col','partition_col','min_members']
+    params = [PROFILE_KEY, METADATA_KEY, OUTDIR_KEY, ID_COLUMN_KEY, PARTITION_COLUMN_KEY, MINIMUM_MEMBERS_KEY]
     missing = []
     for p in params:
         if p not in config or config[p] == '' or config[p] == None:
@@ -330,23 +404,24 @@ def validate_params(config):
 
 def cluster_reporter(config):
     validate_params(config)
-    profile_file = config['profile']
-    partition_file = config['metadata']
-    outdir = config['outdir']
-    outlier_thresh = config['outlier_thresh']
-    thresholds = config['thresholds']
-    method = config['method']
-    force = config['force']
-    id_col = config['id_col']
-    partition_col = config['partition_col']
-    min_members = config['min_members']
-    skip_qc = config['skip_qc']
-    num_threads = config['n_threads']
+    profile_file = config[PROFILE_KEY]
+    partition_file = config[METADATA_KEY]
+    outdir = config[OUTDIR_KEY]
+    outlier_thresh = config[OUTLIER_THRESHOLD_KEY]
+    thresholds = config[THRESHOLDS_KEY]
+    method = config[CLUSTER_METHOD_KEY]
+    force = config[FORCE_KEY]
+    id_col = config[ID_COLUMN_KEY]
+    partition_col = config[PARTITION_COLUMN_KEY]
+    min_members = config[MINIMUM_MEMBERS_KEY]
+    skip_qc = config[SKIP_QC_KEY]
+    num_threads = config[THREADS_KEY]
 
-    missing_thresh = config['missing_thresh']
-    distm = config['distm']
-    count_missing = config['count_missing']
-    delimeter = config['delimeter']
+    missing_thresh = config[MISSING_THRESHOLD_KEY]
+    distm = config[DISTANCE_METHOD_KEY]
+    count_missing = config[COUNT_MISSING_KEY]
+    delimeter = config[DELIMETER_KEY]
+
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
@@ -359,17 +434,16 @@ def cluster_reporter(config):
     run_data['analysis_start_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     run_data['parameters'] = config
     restrict_output = False
-    if "only_report_labeled_columns" in config:
-        restrict_output = config["only_report_labeled_columns"]
+    if ONLY_REPORT_LABELED_KEY in config:
+        restrict_output = config[ONLY_REPORT_LABELED_KEY]
         if not isinstance(restrict_output, bool):
             if restrict_output.lower() in ['f', 'false']:
                 restrict_output = False
             elif restrict_output.lower() in ['t', 'true']:
                 restrict_output = True
             else:
-                print(f'only_report_labeled_columns needs to be true or false : you supplied {restrict_output}')
+                print(f'{ONLY_REPORT_LABELED_KEY} needs to be true or false : you supplied {restrict_output}')
                 sys.exit()
-
 
     linelist_cols_properties = {}
     line_list_columns = []
@@ -380,7 +454,6 @@ def cluster_reporter(config):
                 v = linelist_cols_properties[f]['display'].lower()
                 if v in ['t','true']:
                     line_list_columns.append(f)
-
 
     cluster_summary_cols_properties = {}
     cluster_summary_header = []
@@ -548,8 +621,6 @@ def cluster_reporter(config):
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
-
-
     
     if "linelist_columns" in config:
         line_list_columns = []
@@ -562,7 +633,6 @@ def cluster_reporter(config):
 
     if not restrict_output and 'gas_denovo_cluster_address' not in line_list_columns:
         line_list_columns.append('gas_denovo_cluster_address')
-    
 
     metadata_dfs = []
 
@@ -631,22 +701,17 @@ def main():
             for field in c:
                 config[field] = c[field]
 
-    if not 'outlier_thresh' in config or config['outlier_thresh'] == '':
+    if not OUTLIER_THRESHOLD_KEY in config or config[OUTLIER_THRESHOLD_KEY] == '':
         print(f'Error you must supply an outlier threshold as a cmd line parameter or in the config file')
         sys.exit()
 
-    if not 'thresholds' in config or config['thresholds'] == '':
+    if not THRESHOLDS_KEY in config or config[THRESHOLDS_KEY] == '':
         print(f'Error you must supply a threshold as a cmd line parameter or in the config file')
         sys.exit()
 
-
     cluster_reporter(config)
-
-
 
 
 # call main function
 if __name__ == '__main__':
     main()
-
-

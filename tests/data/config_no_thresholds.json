@@ -1,11 +1,11 @@
     {
         "outlier_thresh": "25",
         "method": "average",
-        "min_cluster_members": 2,
+        "min_members": 2,
         "partition_col": "cluster_id",
         "id_col": "sample_id",
         "only_report_labeled_columns": "False",
-        "skip_qa": "False",
+        "skip_qc": "False",
         
         "grouped_metadata_columns":{ 
             "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  
