@@ -6,7 +6,6 @@
 	"partition_col": "Outbreak",
 	"id_col": "sample_id",
 	"only_report_labeled_columns": "False",
-	"skip_qc": "False",
 
 	"grouped_metadata_columns":{
 		"Outbreak":{ "data_type": "None","label":"Outbreak","default":"","display":"True"},

@@ -112,7 +112,7 @@ The parameters are explained as follows:
 - `--outlier_thresh`: integer value to designate outliers
 - `--min_members` (`-m`): minimum number of samples to designate a cluster
 - `--count_missing` (`-n`): Count missing alleles (0s) as differences
-- `--skip_qc` (`-s`): Skip QA/QC steps
+- `--skip_qc` (`-s`): UNUSED: Skip QA/QC steps
 - `--missing_thresh`: Maximum percentage of missing data allowed per locus (0 - 1)
 - `--thresholds` (`t`): vector of threshold levels for clustering
 - `--method` (`-e`): clustering method
@@ -134,7 +134,6 @@ To enable consistency, we accept a configuration JSON object that allows the use
         "partition_col": "outbreak",
         "id_col": "sample_id",
         "only_report_labeled_columns": "False",
-        "skip_qc": "False",
         
         #Used to configure the order and opperations of columns in the grouped summary (optional)
         "grouped_metadata_columns":{ 
