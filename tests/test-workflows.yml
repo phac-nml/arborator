@@ -333,3 +333,31 @@
   stdout:
     contains:
       - "Error, parameters not set for: ['id_col', 'partition_col']"
+
+- name: Command-Line Parameter Warnings
+  tags:
+    - parameter_warnings
+    - parameter_warnings_command_line
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --skip_qc --missing_thresh 5 --distm scaled --count_missing --delimiter "."  --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id
+  exit_code: 0
+  stdout:
+    contains:
+      - "WARNING: skip QC (--skip_qc/-s) was provided, but this parameter is currently unused."
+      - "WARNING: missing threshold (--missing_thresh) was provided, but this parameter is currently unused."
+      - "WARNING: distance method (--distm) was provided, but this parameter is currently unused."
+      - "WARNING: count missing (--count_missing/-n) was provided, but this parameter is currently unused."
+      - "WARNING: delimiter (--delimiter/-d) was provided, but this parameter is currently unused."
+
+- name: Config Parameter Warnings
+  tags:
+    - parameter_warnings
+    - parameter_warnings_config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_specify_warning_parameters.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - "WARNING: skip QC (--skip_qc/-s) was provided, but this parameter is currently unused."
+      - "WARNING: missing threshold (--missing_thresh) was provided, but this parameter is currently unused."
+      - "WARNING: distance method (--distm) was provided, but this parameter is currently unused."
+      - "WARNING: count missing (--count_missing/-n) was provided, but this parameter is currently unused."
+      - "WARNING: delimiter (--delimiter/-d) was provided, but this parameter is currently unused."
