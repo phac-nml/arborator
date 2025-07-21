@@ -133,17 +133,16 @@ def parse_args():
                         action='store_true')
 
     #profile dists
-    parser.add_argument(COUNT_MISSING_LONG, COUNT_MISSING_SHORT, required=False, help='Count missing as differences',
+    parser.add_argument(COUNT_MISSING_LONG, COUNT_MISSING_SHORT, required=False, help='UNUSED: Count missing as differences',
                         action='store_true')
     parser.add_argument(MISSING_THRESHOLD_LONG, type=float, required=False,
-                        help='Maximum percentage of missing data allowed per locus (0 - 1)',default=1.0)
-    parser.add_argument(DISTANCE_METHOD_LONG, type=str, required=False, help='Distance method raw hamming or scaled difference [hamming, scaled]',default='scaled')
-    parser.add_argument(SKIP_QC_LONG, SKIP_QC_SHORT, required=False, help='Skip QA/QC steps',
+                        help='UNUSED: Maximum percentage of missing data allowed per locus (0 - 1)')
+    parser.add_argument(DISTANCE_METHOD_LONG, type=str, required=False, help='UNUSED: Distance method raw hamming or scaled difference [hamming, scaled]')
+    parser.add_argument(SKIP_QC_LONG, SKIP_QC_SHORT, required=False, help='UNUSED: Skip QA/QC steps',
                         action='store_true')
     #GAS
     parser.add_argument(THRESHOLDS_LONG, THRESHOLDS_SHORT, type=str, required=False, help='thresholds delimited by ,',default='100')
-    parser.add_argument(DELIMETER_LONG, DELIMETER_SHORT, type=str, required=False, help='delimeter desired for nomenclature code',
-                        default=".")
+    parser.add_argument(DELIMETER_LONG, DELIMETER_SHORT, type=str, required=False, help='UNUSED: delimeter desired for nomenclature code')
     parser.add_argument(CLUSTER_METHOD_LONG, CLUSTER_METHOD_SHORT, type=str, required=False, help='cluster method [single, complete, average]',
                         default='average')
 
@@ -419,6 +418,28 @@ def cluster_reporter(config):
     distm = config[DISTANCE_METHOD_KEY]
     count_missing = config[COUNT_MISSING_KEY]
     delimeter = config[DELIMETER_KEY]
+
+    # We're leaving the skip_qc for later, but want to warn.
+    # Since it's in argparse as a flag, it will always be false
+    # if not provided. It may also be a boolean or a string
+    # depending on whether it's passed in the config (string)
+    # or argparse (bool).
+    if(skip_qc in [True, "true", "True"]):
+        print(f'WARNING: skip QC ({SKIP_QC_LONG}/{SKIP_QC_SHORT}) was provided, but this parameter is currently unused.')
+
+    if(missing_thresh):
+        print(f'WARNING: missing threshold ({MISSING_THRESHOLD_LONG}) was provided, but this parameter is currently unused.')
+
+    if(distm):
+        print(f'WARNING: distance method ({DISTANCE_METHOD_LONG}) was provided, but this parameter is currently unused.')
+
+    # May be string or boolean.
+    # See above comment for skip_qc.
+    if(count_missing in [True, "true", "True"]):
+        print(f'WARNING: count missing ({COUNT_MISSING_LONG}/{COUNT_MISSING_SHORT}) was provided, but this parameter is currently unused.')
+
+    if(delimeter):
+        print(f'WARNING: delimeter ({DELIMETER_LONG}/{DELIMETER_SHORT}) was provided, but this parameter is currently unused.')
 
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
