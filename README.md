@@ -111,9 +111,9 @@ The parameters are explained as follows:
 - `--id_col` (`-i`): name of column with sample IDs
 - `--outlier_thresh`: integer value to designate outliers
 - `--min_members` (`-m`): minimum number of samples to designate a cluster
-- `--count_missing` (`-n`): Count missing alleles (0s) as differences
-- `--skip_qc` (`-s`): UNUSED: Skip QA/QC steps
-- `--missing_thresh`: Maximum percentage of missing data allowed per locus (0 - 1)
+- `--count_missing` (`-n`): (UNUSED) Count missing alleles (0s) as differences
+- `--skip_qc` (`-s`): (UNUSED) Skip QA/QC steps
+- `--missing_thresh`: (UNUSED) Maximum percentage of missing data allowed per locus (0 - 1)
 - `--thresholds` (`t`): vector of threshold levels for clustering
 - `--method` (`-e`): clustering method
 - `--force` (`-f`): overwrite existing output results
