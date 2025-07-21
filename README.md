@@ -89,7 +89,7 @@ usage: arborator [-h] --profile PROFILE --metadata METADATA [--config CONFIG] --
                  [--partition_col PARTITION_COL] [--id_col ID_COL] [--outlier_thresh OUTLIER_THRESH]
                  [--min_members MIN_MEMBERS] [--only_report_labeled_columns] [--count_missing]
                  [--missing_thresh MISSING_THRESH] [--distm DISTM] [--skip_qc] [--thresholds THRESHOLDS]
-                 [--delimeter DELIMETER] [--method METHOD] [--force] [--n_threads N_THREADS] [--version]
+                 [--delimiter DELIMITER] [--method METHOD] [--force] [--n_threads N_THREADS] [--version]
 ```
 
 ## Quick Start

@@ -68,9 +68,9 @@ THRESHOLDS_KEY = "thresholds"
 THRESHOLDS_LONG = "--" + THRESHOLDS_KEY
 THRESHOLDS_SHORT = "-t"
 
-DELIMETER_KEY = "delimeter"
-DELIMETER_LONG = "--" + DELIMETER_KEY
-DELIMETER_SHORT = "-d"
+DELIMITER_KEY = "delimiter"
+DELIMITER_LONG = "--" + DELIMITER_KEY
+DELIMITER_SHORT = "-d"
 
 CLUSTER_METHOD_KEY = "method"
 CLUSTER_METHOD_LONG = "--" + CLUSTER_METHOD_KEY
@@ -142,7 +142,7 @@ def parse_args():
                         action='store_true')
     #GAS
     parser.add_argument(THRESHOLDS_LONG, THRESHOLDS_SHORT, type=str, required=False, help='thresholds delimited by ,',default='100')
-    parser.add_argument(DELIMETER_LONG, DELIMETER_SHORT, type=str, required=False, help='UNUSED: delimeter desired for nomenclature code')
+    parser.add_argument(DELIMITER_LONG, DELIMITER_SHORT, type=str, required=False, help='UNUSED: delimiter desired for nomenclature code')
     parser.add_argument(CLUSTER_METHOD_LONG, CLUSTER_METHOD_SHORT, type=str, required=False, help='cluster method [single, complete, average]',
                         default='average')
 
@@ -417,7 +417,7 @@ def cluster_reporter(config):
     missing_thresh = config[MISSING_THRESHOLD_KEY]
     distm = config[DISTANCE_METHOD_KEY]
     count_missing = config[COUNT_MISSING_KEY]
-    delimeter = config[DELIMETER_KEY]
+    delimiter = config[DELIMITER_KEY]
 
     # We're leaving the skip_qc for later, but want to warn.
     # Since it's in argparse as a flag, it will always be false
@@ -438,8 +438,8 @@ def cluster_reporter(config):
     if(count_missing in [True, "true", "True"]):
         print(f'WARNING: count missing ({COUNT_MISSING_LONG}/{COUNT_MISSING_SHORT}) was provided, but this parameter is currently unused.')
 
-    if(delimeter):
-        print(f'WARNING: delimeter ({DELIMETER_LONG}/{DELIMETER_SHORT}) was provided, but this parameter is currently unused.')
+    if(delimiter):
+        print(f'WARNING: delimiter ({DELIMITER_LONG}/{DELIMITER_SHORT}) was provided, but this parameter is currently unused.')
 
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
