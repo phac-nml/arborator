@@ -399,9 +399,6 @@ def validate_params(config):
         print(f"Error, parameters not set for: {missing}")
         sys.exit()
 
-    
-
-
 def cluster_reporter(config):
     validate_params(config)
     profile_file = config[PROFILE_KEY]
@@ -414,9 +411,10 @@ def cluster_reporter(config):
     id_col = config[ID_COLUMN_KEY]
     partition_col = config[PARTITION_COLUMN_KEY]
     min_members = config[MINIMUM_MEMBERS_KEY]
-    skip_qc = config[SKIP_QC_KEY]
     num_threads = config[THREADS_KEY]
 
+    # Unused parameters:
+    skip_qc = config[SKIP_QC_KEY]
     missing_thresh = config[MISSING_THRESHOLD_KEY]
     distm = config[DISTANCE_METHOD_KEY]
     count_missing = config[COUNT_MISSING_KEY]
