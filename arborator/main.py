@@ -370,10 +370,10 @@ def update_column_order(df,col_properties,restrict=False):
     df_cols = list(df.columns)
     num_rows = len(df)
     for col in col_properties:
-        cols[col] = col_properties[col]['label']
-        if col not in df_cols:
-            df[col] = [col_properties[col]['default']] * num_rows
-
+        if col_properties[col]['display'] in [True, "True", "true"]:
+            cols[col] = col_properties[col]['label']
+            if col not in df_cols:
+                df[col] = [col_properties[col]['default']] * num_rows
 
     order = list(cols.keys())
     if not restrict:
@@ -673,6 +673,7 @@ def cluster_reporter(config):
     
     linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
     linelist_df = linelist_df[line_list_columns]
+    linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
     linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
 
     run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
