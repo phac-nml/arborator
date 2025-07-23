@@ -90,6 +90,18 @@ VERSION_SHORT = "-V"
 ONLY_REPORT_LABELED_KEY = "only_report_labeled_columns"
 ONLY_REPORT_LABELED_LONG = "--" + ONLY_REPORT_LABELED_KEY
 
+GROUPED_METADATA_COLUMNS_KEY = "grouped_metadata_columns"
+
+LINELIST_COLUMNS_KEY = "linelist_columns"
+
+PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
+                  PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
+                  MINIMUM_MEMBERS_KEY, COUNT_MISSING_KEY, MISSING_THRESHOLD_KEY,
+                  DISTANCE_METHOD_KEY, SKIP_QC_KEY, THRESHOLDS_KEY,
+                  DELIMITER_KEY, CLUSTER_METHOD_KEY, FORCE_KEY, THREADS_KEY,
+                  VERSION_KEY, ONLY_REPORT_LABELED_KEY,
+                  GROUPED_METADATA_COLUMNS_KEY, LINELIST_COLUMNS_KEY]
+
 def parse_args():
     """ Argument Parsing method.
 
@@ -419,6 +431,11 @@ def cluster_reporter(config):
     count_missing = config[COUNT_MISSING_KEY]
     delimiter = config[DELIMITER_KEY]
 
+    # Check for any unexpected config keys:
+    for key in config.keys():
+        if key not in PARAMETER_KEYS:
+            print(f'WARNING: "{key}" parameter unrecognized')
+
     # We're leaving the skip_qc for later, but want to warn.
     # Since it's in argparse as a flag, it will always be false
     # if not provided. It may also be a boolean or a string
@@ -466,8 +483,8 @@ def cluster_reporter(config):
 
     linelist_cols_properties = {}
     line_list_columns = []
-    if "linelist_columns" in config:
-        linelist_cols_properties = config["linelist_columns"]
+    if LINELIST_COLUMNS_KEY in config:
+        linelist_cols_properties = config[LINELIST_COLUMNS_KEY]
         for f in linelist_cols_properties:
             if 'display' in linelist_cols_properties[f]:
                 v = linelist_cols_properties[f]['display'].lower()
@@ -477,8 +494,8 @@ def cluster_reporter(config):
     cluster_summary_cols_properties = {}
     cluster_summary_header = []
     cluster_display_cols_to_remove = []
-    if "grouped_metadata_columns" in config:
-        cluster_summary_cols_properties = config["grouped_metadata_columns"]
+    if GROUPED_METADATA_COLUMNS_KEY in config:
+        cluster_summary_cols_properties = config[GROUPED_METADATA_COLUMNS_KEY]
         cluster_summary_header = list(cluster_summary_cols_properties.keys())
         for f in cluster_summary_cols_properties:
             cluster_summary_cols_properties[f]['data_type'] = cluster_summary_cols_properties[f]['data_type'].lower()
@@ -641,9 +658,9 @@ def cluster_reporter(config):
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
     
-    if "linelist_columns" in config:
+    if LINELIST_COLUMNS_KEY in config:
         line_list_columns = []
-        linelist_cols_properties = config["linelist_columns"]
+        linelist_cols_properties = config[LINELIST_COLUMNS_KEY]
         for f in linelist_cols_properties:
             if 'display' in linelist_cols_properties[f]:
                 v = linelist_cols_properties[f]['display'].lower()

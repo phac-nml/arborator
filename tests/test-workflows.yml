@@ -3,6 +3,9 @@
 
 - name: Basic arborator test
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -49,6 +52,9 @@
     - config_overwrites_command_line
     - config_overwrites_command_line_thresholds
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
   files:
     - path: "results/1/clusters.tsv"
       contains:
@@ -87,6 +93,9 @@
     - command_line_argument_used
     - command_line_argument_used_thresholds
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -177,6 +186,8 @@
   stdout:
     contains:
       - "Profile path tests/data/profile_file_does_not_exist.tsv does not exist, please check path and try again"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test File Handling - Missing metadata
   tags:
@@ -187,6 +198,8 @@
   stdout:
     contains:
       - "Metadata file tests/data/metadata_file_does_not_exist.tsv does not exist, please check path and try again"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test File Handling - Missing config
   tags:
@@ -197,11 +210,16 @@
   stdout:
     contains:
       - "Config path tests/data/config_file_does_not_exist.json does not exist, please check path and try again"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test Specifying Parameters on Command-Line
   tags:
     - specify_parameters_on_command_line
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
   exit_code: 0
   files:
     - path: "results/cluster_summary.tsv"
@@ -253,6 +271,8 @@
   stdout:
     contains:
       - "Outlier threshold needs to be numeric: notanumber"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test Config - Invalid Method
   tags:
@@ -263,6 +283,8 @@
   stdout:
     contains:
       - "Linkage method supplied is invalid: invalid_method_DNE, it needs to be one of average, single, complete"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test Config - Thresholds Not a Number
   tags:
@@ -283,6 +305,8 @@
   stdout:
     contains:
       - "Min members needs to be an integer notanumber"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test Config - partition_col Does Not Exist
   tags:
@@ -303,6 +327,8 @@
   stdout:
     contains:
       - "Error, parameters not set for: ['partition_col']"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test Config - ID Column Missing
   tags:
@@ -313,6 +339,8 @@
   stdout:
     contains:
       - "Error, parameters not set for: ['id_col']"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test Config - Only Report Labeled Columns Not Boolean
   tags:
@@ -323,6 +351,8 @@
   stdout:
     contains:
       - "only_report_labeled_columns needs to be true or false : you supplied notboolean"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Test Config - Multiple Parameters Not Specified
   tags:
@@ -333,6 +363,8 @@
   stdout:
     contains:
       - "Error, parameters not set for: ['id_col', 'partition_col']"
+    must_not_contain:
+      - "parameter unrecognized"
 
 - name: Command-Line Parameter Warnings
   tags:
@@ -367,6 +399,9 @@
   tags:
     - config
     - config_no_grouped_metadata_specification
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -416,6 +451,9 @@
 
 - name: No Linelist Specification in Config
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_linelist.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
   tags:
     - config
     - config_no_linelist_specification
@@ -470,3 +508,13 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Unrecognized Config Parameters
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_unrecognized_parameters.json --outdir results
+  tags:
+  - config
+  - config_unrecognized_parameters
+  stdout:
+    contains:
+      - 'WARNING: "UNRECOGNIZED1" parameter unrecognized'
+      - 'WARNING: "UNKNOWN2" parameter unrecognized'
