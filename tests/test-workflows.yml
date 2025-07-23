@@ -361,3 +361,112 @@
       - "WARNING: distance method (--distm) was provided, but this parameter is currently unused."
       - "WARNING: count missing (--count_missing/-n) was provided, but this parameter is currently unused."
       - "WARNING: delimiter (--delimiter/-d) was provided, but this parameter is currently unused."
+
+- name: No Grouped Meta Specification in Config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_grouped_metadata.json --outdir results
+  tags:
+    - config
+    - config_no_grouped_metadata_specification
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "cluster_id"
+        - "min_dist"
+        - "median_dist"
+      must_not_contain:
+        - "OutbreakID"
+        - "Country of collection"
+        - "Species"
+        - "Score"
+        - "State or Province"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: No Linelist Specification in Config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_linelist.json --outdir results
+  tags:
+    - config
+    - config_no_linelist_specification
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "organism"
+        - "cluster_id"
+        - "score"
+      must_not_contain:
+        - "Identifier"
+        - "OutbreakID"
+        - "Country of collection"
+        - "State or Province"
+        - "Species"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "gas_denovo_cluster_address"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
