@@ -1,18 +1,17 @@
-    {
-        "outlier_thresh": "25",
-        "method": "average",
-        "thresholds": "10,5,2,1,0",
-        "min_members": 2,
-        "partition_col": "cluster_id",
-        "id_col": "sample_id",
-        "only_report_labeled_columns": "False",
+{
+    "outlier_thresh": "25",
+    "method": "average",
+    "thresholds": "10,5,2,1,0",
+    "min_members": 2,
+    "partition_col": "cluster_id",
+    "id_col": "sample_id",
+    "only_report_labeled_columns": "False",
 
-        "linelist_columns":{
-			"sample_id":{ "data_type": "None","label":"Identifier","default":"","display":"True"},  
-            "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  
-            "country":{ "data_type": "categorical","label":"Country of collection","default":"","display":"True"},
-            "state/province":{ "data_type": "categorical","label":"State or Province","default":"","display":"True"}, 
-            "organism":{ "data_type": "categorical","label":"Species","default":"","display":"False"}
-        }
-    
+    "linelist_columns":{
+        "sample_id":{ "data_type": "None","label":"Identifier","default":"","display":"True"},  
+        "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  
+        "country":{ "data_type": "categorical","label":"Country of collection","default":"","display":"True"},
+        "state/province":{ "data_type": "categorical","label":"State or Province","default":"","display":"True"}, 
+        "organism":{ "data_type": "categorical","label":"Species","default":"","display":"False"}
     }
+}
