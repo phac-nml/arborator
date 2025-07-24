@@ -392,7 +392,7 @@ def update_column_order(df,col_properties,restrict=False):
     df_cols = list(df.columns)
     num_rows = len(df)
     for col in col_properties:
-        if col_properties[col][DISPLAY_KEY] in [True, "True", "true"]:
+        if col_properties[col][DISPLAY_KEY]:
             cols[col] = col_properties[col]['label']
             if col not in df_cols:
                 df[col] = [col_properties[col]['default']] * num_rows
@@ -571,16 +571,6 @@ def cluster_reporter(config):
 
     thresholds = process_thresholds(thresholds)
 
-    if not isinstance(force, bool):
-        if force.lower() in ['f','false']:
-            force = False
-        elif force.lower() in ['t','true']:
-            force = True
-        else:
-            print(f'Force needs to be true or false : you supplied {force}')
-            sys.exit()
-
-
     if not method in ['average','complete','single']:
         print(f'Linkage method supplied is invalid: {method}, it needs to be one of average, single, complete')
         sys.exit()
@@ -685,7 +675,7 @@ def cluster_reporter(config):
     for col in cluster_summary_cols_properties:
         prop = cluster_summary_cols_properties[col]
         if DISPLAY_KEY in prop:
-            if prop[DISPLAY_KEY] in ['true','True',True]:
+            if prop[DISPLAY_KEY]:
                 display_columns.append(col)
         else:
             display_columns.append(col)
