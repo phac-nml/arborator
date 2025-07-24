@@ -577,6 +577,10 @@ def cluster_reporter(config):
     metadata = read_data(partition_file)
     metadata_df = metadata.df
 
+    if len(metadata_df) == 0:
+        message = f'No metadata rows were provided.'
+        raise Exception(message)
+
     input_profile_samples = set(profile_df[id_col])
     input_metadata_samples = set(metadata_df[id_col])
 

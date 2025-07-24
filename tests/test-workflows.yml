@@ -551,3 +551,13 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: No Rows in Metadata
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_no_rows.tsv --config tests/data/config_min_members_2.json --outdir results
+  tags:
+  - metadata
+  - metadata_no_rows
+  exit_code: 1
+  stderr:
+    contains:
+      - "No metadata rows were provided."
