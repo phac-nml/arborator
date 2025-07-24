@@ -518,3 +518,36 @@
     contains:
       - 'WARNING: "UNRECOGNIZED1" parameter unrecognized'
       - 'WARNING: "UNKNOWN2" parameter unrecognized'
+
+- name: One Row in Metadata - min_members 2
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_one_row.tsv --config tests/data/config_min_members_2.json --outdir results
+  tags:
+  - metadata
+  - metadata_one_row_min_members_2
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      should_exist: false
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'

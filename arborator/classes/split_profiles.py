@@ -26,7 +26,7 @@ class split_profiles:
     def create_groups(self):
         self.groups = {}
         for sample_id in self.partitions:
-            group_id = self.partitions[sample_id]
+            group_id = str(self.partitions[sample_id])
             if not group_id in self.groups:
                 self.groups[group_id] = []
             self.groups[group_id].append(sample_id)

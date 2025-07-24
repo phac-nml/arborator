@@ -687,11 +687,16 @@ def cluster_reporter(config):
         if num_members < min_members:
             shutil.rmtree(os.path.join(outdir,group_id))
 
-    
+
     linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
-    linelist_df = linelist_df[line_list_columns]
-    linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
-    linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
+
+    # Check that the expected columns exist:
+    # This is mainly to catch when clusters aren't created
+    # and no 'cluster_id' column exists.
+    if set(line_list_columns).issubset(linelist_df.columns):
+        linelist_df = linelist_df[line_list_columns]
+        linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
+        linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
 
     run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     sys.stdout.flush()
