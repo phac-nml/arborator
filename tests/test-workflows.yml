@@ -347,10 +347,10 @@
     - test_config
     - test_config_only_report_not_boolean
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_only_report_not_boolean.json --outdir results
-  exit_code: 0
-  stdout:
+  exit_code: 1
+  stderr:
     contains:
-      - "only_report_labeled_columns needs to be true or false : you supplied notboolean"
+      - "Expected a boolean-like string for only_report_labeled_columns but found notboolean"
     must_not_contain:
       - "parameter unrecognized"
 

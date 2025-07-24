@@ -102,6 +102,14 @@ PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
                   VERSION_KEY, ONLY_REPORT_LABELED_KEY,
                   GROUPED_METADATA_COLUMNS_KEY, LINELIST_COLUMNS_KEY]
 
+BOOLEAN_KEYS = [COUNT_MISSING_KEY, SKIP_QC_KEY, FORCE_KEY, ONLY_REPORT_LABELED_KEY]
+
+# Expected to check lowercase:
+TRUE_STRINGS = ["t", "true"]
+
+# Expected to check lowercase:
+FALSE_STRINGS = ["f", "false"]
+
 def parse_args():
     """ Argument Parsing method.
 
@@ -410,6 +418,21 @@ def validate_params(config):
         print(f"Error, parameters not set for: {missing}")
         sys.exit()
 
+    for key in config.keys():
+        # Check for any unexpected config keys:
+        if key not in PARAMETER_KEYS:
+            print(f'WARNING: "{key}" parameter unrecognized')
+
+        # Convert string booleans into actual booleans:
+        if key in BOOLEAN_KEYS and not isinstance(key, bool):
+            if str(config[key]).lower() in TRUE_STRINGS:
+                config[key] = True
+            elif str(config[key]).lower() in FALSE_STRINGS:
+                config[key] = False
+            else:
+                message = f'Expected a boolean-like string for {key} but found {config[key]}'
+                raise Exception(message)
+
 def cluster_reporter(config):
     validate_params(config)
     profile_file = config[PROFILE_KEY]
@@ -431,17 +454,10 @@ def cluster_reporter(config):
     count_missing = config[COUNT_MISSING_KEY]
     delimiter = config[DELIMITER_KEY]
 
-    # Check for any unexpected config keys:
-    for key in config.keys():
-        if key not in PARAMETER_KEYS:
-            print(f'WARNING: "{key}" parameter unrecognized')
-
     # We're leaving the skip_qc for later, but want to warn.
     # Since it's in argparse as a flag, it will always be false
-    # if not provided. It may also be a boolean or a string
-    # depending on whether it's passed in the config (string)
-    # or argparse (bool).
-    if(skip_qc in [True, "true", "True"]):
+    # if not provided.
+    if(skip_qc):
         print(f'WARNING: skip QC ({SKIP_QC_LONG}/{SKIP_QC_SHORT}) was provided, but this parameter is currently unused.')
 
     if(missing_thresh):
@@ -450,9 +466,8 @@ def cluster_reporter(config):
     if(distm):
         print(f'WARNING: distance method ({DISTANCE_METHOD_LONG}) was provided, but this parameter is currently unused.')
 
-    # May be string or boolean.
     # See above comment for skip_qc.
-    if(count_missing in [True, "true", "True"]):
+    if(count_missing):
         print(f'WARNING: count missing ({COUNT_MISSING_LONG}/{COUNT_MISSING_SHORT}) was provided, but this parameter is currently unused.')
 
     if(delimiter):
@@ -469,17 +484,11 @@ def cluster_reporter(config):
     run_data = {}
     run_data['analysis_start_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     run_data['parameters'] = config
-    restrict_output = False
+
     if ONLY_REPORT_LABELED_KEY in config:
         restrict_output = config[ONLY_REPORT_LABELED_KEY]
-        if not isinstance(restrict_output, bool):
-            if restrict_output.lower() in ['f', 'false']:
-                restrict_output = False
-            elif restrict_output.lower() in ['t', 'true']:
-                restrict_output = True
-            else:
-                print(f'{ONLY_REPORT_LABELED_KEY} needs to be true or false : you supplied {restrict_output}')
-                sys.exit()
+    else:
+        restrict_output = False
 
     linelist_cols_properties = {}
     line_list_columns = []
