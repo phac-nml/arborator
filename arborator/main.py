@@ -246,7 +246,7 @@ def stage_data(groups,outdir,metadata_df,id_col,max_missing_frac=1):
 
     return files
 
-def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method,num_cpus=1):
+def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, min_members, num_cpus=1):
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
@@ -259,7 +259,7 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method,n
 
     results = []
     for group_id in group_files:
-        results.append(pool.apply_async(process_group, (group_id,group_files[group_id],id_col,group_col,thresholds,outlier_thresh,method)))
+        results.append(pool.apply_async(process_group, (group_id,group_files[group_id],id_col,group_col,thresholds,outlier_thresh,method, min_members)))
 
     pool.close()
     pool.join()
@@ -558,6 +558,10 @@ def cluster_reporter(config):
             print(f'Min members needs to be an integer {min_members}')
             sys.exit()
 
+    if min_members < 2:
+        message = f'{MINIMUM_MEMBERS_KEY} ({min_members}) needs to be at least 2.'
+        raise Exception(message)
+
     if not force and os.path.isdir(outdir):
         print(f'folder {outdir} already exists, please choose new directory or use --force')
         sys.exit()
@@ -625,7 +629,7 @@ def cluster_reporter(config):
         fh.write(json.dumps(run_data['threshold_map'], indent=4))
 
     group_files = stage_data(groups, outdir, metadata_df, id_col, max_missing_frac=1)
-    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, num_threads)
+    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, num_threads)
     group_metrics = {}
     for r in results:
         for k in r:

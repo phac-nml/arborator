@@ -561,3 +561,68 @@
   stderr:
     contains:
       - "No metadata rows were provided."
+
+- name: One Row in Metadata - min_members 1
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_one_row.tsv --config tests/data/config_min_members_1.json --outdir results
+  tags:
+  - metadata
+  - metadata_one_row_min_members_1
+  exit_code: 1
+  stderr:
+    contains:
+      - "min_members (1) needs to be at least 2."
+
+- name: min_members is 3
+  tags:
+    - min_members_3
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_min_members_3.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/run.json"
+      contains:
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: min_members is 6
+  tags:
+    - min_members_6
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_min_members_6.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/run.json"
+      contains:
+        - '"thresholds": "10,5,2,1,0"'
