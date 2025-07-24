@@ -350,7 +350,7 @@
   exit_code: 1
   stderr:
     contains:
-      - "Expected a boolean-like string for only_report_labeled_columns but found notboolean"
+      - "Expected a boolean-like string but found notboolean"
     must_not_contain:
       - "parameter unrecognized"
 

@@ -94,6 +94,8 @@ GROUPED_METADATA_COLUMNS_KEY = "grouped_metadata_columns"
 
 LINELIST_COLUMNS_KEY = "linelist_columns"
 
+DISPLAY_KEY = "display"
+
 PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
                   PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
                   MINIMUM_MEMBERS_KEY, COUNT_MISSING_KEY, MISSING_THRESHOLD_KEY,
@@ -390,7 +392,7 @@ def update_column_order(df,col_properties,restrict=False):
     df_cols = list(df.columns)
     num_rows = len(df)
     for col in col_properties:
-        if col_properties[col]['display'] in [True, "True", "true"]:
+        if col_properties[col][DISPLAY_KEY] in [True, "True", "true"]:
             cols[col] = col_properties[col]['label']
             if col not in df_cols:
                 df[col] = [col_properties[col]['default']] * num_rows
@@ -408,6 +410,21 @@ def update_column_order(df,col_properties,restrict=False):
 
     return df[list(cols.values())]
 
+def convert_to_bool(input):
+
+    if not isinstance(input, bool):
+            if str(input).lower() in TRUE_STRINGS:
+                result = True
+            elif str(input).lower() in FALSE_STRINGS:
+                result = False
+            else:
+                message = f'Expected a boolean-like string but found {input}'
+                raise Exception(message)
+    else:
+        result = input
+
+    return result
+
 def validate_params(config):
     params = [PROFILE_KEY, METADATA_KEY, OUTDIR_KEY, ID_COLUMN_KEY, PARTITION_COLUMN_KEY, MINIMUM_MEMBERS_KEY]
     missing = []
@@ -424,14 +441,24 @@ def validate_params(config):
             print(f'WARNING: "{key}" parameter unrecognized')
 
         # Convert string booleans into actual booleans:
-        if key in BOOLEAN_KEYS and not isinstance(key, bool):
-            if str(config[key]).lower() in TRUE_STRINGS:
-                config[key] = True
-            elif str(config[key]).lower() in FALSE_STRINGS:
-                config[key] = False
-            else:
-                message = f'Expected a boolean-like string for {key} but found {config[key]}'
-                raise Exception(message)
+        if key in BOOLEAN_KEYS:
+            config[key] = convert_to_bool(config[key])
+
+    # Convert string booleans into actual booleans:
+    if GROUPED_METADATA_COLUMNS_KEY in config:
+        summaries = config[GROUPED_METADATA_COLUMNS_KEY]
+        for summary in summaries:
+            if DISPLAY_KEY in summaries[summary]:
+                display = summaries[summary][DISPLAY_KEY]
+                summaries[summary][DISPLAY_KEY] = convert_to_bool(display)
+
+    # Convert string booleans into actual booleans:
+    if LINELIST_COLUMNS_KEY in config:
+        summaries = config[LINELIST_COLUMNS_KEY]
+        for summary in summaries:
+            if DISPLAY_KEY in summaries[summary]:
+                display = summaries[summary][DISPLAY_KEY]
+                summaries[summary][DISPLAY_KEY] = convert_to_bool(display)
 
 def cluster_reporter(config):
     validate_params(config)
@@ -495,9 +522,8 @@ def cluster_reporter(config):
     if LINELIST_COLUMNS_KEY in config:
         linelist_cols_properties = config[LINELIST_COLUMNS_KEY]
         for f in linelist_cols_properties:
-            if 'display' in linelist_cols_properties[f]:
-                v = linelist_cols_properties[f]['display'].lower()
-                if v in ['t','true']:
+            if DISPLAY_KEY in linelist_cols_properties[f]:
+                if linelist_cols_properties[f][DISPLAY_KEY]:
                     line_list_columns.append(f)
 
     cluster_summary_cols_properties = {}
@@ -508,9 +534,8 @@ def cluster_reporter(config):
         cluster_summary_header = list(cluster_summary_cols_properties.keys())
         for f in cluster_summary_cols_properties:
             cluster_summary_cols_properties[f]['data_type'] = cluster_summary_cols_properties[f]['data_type'].lower()
-            if 'display' in cluster_summary_cols_properties[f]:
-                v = cluster_summary_cols_properties[f]['display'].lower()
-                if v in ['f','false']:
+            if DISPLAY_KEY in cluster_summary_cols_properties[f]:
+                if not cluster_summary_cols_properties[f][DISPLAY_KEY]:
                     cluster_display_cols_to_remove.append(f)
     else:
         cluster_summary_cols_properties[partition_col] = { "data_type": "none","label":partition_col,"default":"","display":"True"}
@@ -659,8 +684,8 @@ def cluster_reporter(config):
     display_columns = []
     for col in cluster_summary_cols_properties:
         prop = cluster_summary_cols_properties[col]
-        if 'display' in prop:
-            if prop['display'] in ['true','True',True]:
+        if DISPLAY_KEY in prop:
+            if prop[DISPLAY_KEY] in ['true','True',True]:
                 display_columns.append(col)
         else:
             display_columns.append(col)
@@ -679,9 +704,8 @@ def cluster_reporter(config):
         line_list_columns = []
         linelist_cols_properties = config[LINELIST_COLUMNS_KEY]
         for f in linelist_cols_properties:
-            if 'display' in linelist_cols_properties[f]:
-                v = linelist_cols_properties[f]['display'].lower()
-                if v in ['t','true']:
+            if DISPLAY_KEY in linelist_cols_properties[f]:
+                if linelist_cols_properties[f][DISPLAY_KEY]:
                     line_list_columns.append(f)
 
     if not restrict_output and 'gas_denovo_cluster_address' not in line_list_columns:
