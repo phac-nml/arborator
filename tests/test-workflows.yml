@@ -679,3 +679,16 @@
         - '"count_missing": false'
         - '"skip_qc": false'
         - '"force": false'
+
+- name: num_threads is 0
+  tags:
+    - threads
+    - threads_0
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id --n_threads 0
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "n_threads (0) needs to be at least 1."

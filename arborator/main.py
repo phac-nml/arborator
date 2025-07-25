@@ -504,7 +504,11 @@ def cluster_reporter(config):
     except AttributeError:
         sys_num_cpus = cpu_count()
 
-    if num_threads > sys_num_cpus:
+    if num_threads < 1:
+        message = f'{THREADS_KEY} ({num_threads}) needs to be at least 1.'
+        raise Exception(message)
+    elif num_threads > sys_num_cpus:
+        print(f'WARNING: {THREADS_KEY} ({num_threads}) exceeds the number of CPUs available ({sys_num_cpus}). Setting {THREADS_KEY} to {sys_num_cpus}.')
         num_threads = sys_num_cpus
 
     run_data = {}
