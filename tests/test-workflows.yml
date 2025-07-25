@@ -864,3 +864,79 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Metadata Summary - None
+  tags:
+    - metadata
+    - metadata_summary_none
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_summarize_none.tsv --config tests/data/config_summarize_none.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\trandom"
+        - "1\t1,1.5,tomato,0.potato,1,000"
+        - "2\t2,fish"
+        - "3\t3,quote"
+        - "4\t4.0"
+        - "5\tcat,5.1"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\trandom\tgas_denovo_cluster_address"
+        - "A\t1\t1|1.1.1.1.1"
+        - "B\t1.5\t1|1.1.1.1.2"
+        - "K\ttomato\t1|1.1.1.2.3"
+        - "L\t0.potato\t1|1.1.1.2.4"
+        - "M\t1,000\t1|1.1.1.1.1"
+        - "C\t2\t2|1.1.1.1.1"
+        - "D\tfish\t2|1.1.1.1.2"
+        - "E\t3\t3|1.1.1.1.1"
+        - "F\tquote\t3|1.1.1.1.2"
+        - "G\t4.0\t4|1.1.1.1.1"
+        - "H\t4.0\t4|1.1.1.1.2"
+        - "I\tcat\t5|1.1.1.1.1"
+        - "J\t5.1\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'

@@ -94,6 +94,7 @@ ONLY_REPORT_LABELED_LONG = "--" + ONLY_REPORT_LABELED_KEY
 GROUPED_METADATA_COLUMNS_KEY = "grouped_metadata_columns"
 LINELIST_COLUMNS_KEY = "linelist_columns"
 DISPLAY_KEY = "display"
+LABEL_KEY = "label"
 
 PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
                   PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
@@ -371,7 +372,7 @@ def format_df(column_map,df):
 def prepare_column_map(column_info,columns):
     column_map = {}
     for f in column_info:
-        column_map[f] = column_info[f]['label']
+        column_map[f] = column_info[f][LABEL_KEY]
         if column_map[f] == "":
             column_map[f] = f
 
@@ -392,8 +393,11 @@ def update_column_order(df,col_properties,restrict=False):
     df_cols = list(df.columns)
     num_rows = len(df)
     for col in col_properties:
-        if col_properties[col][DISPLAY_KEY]:
-            cols[col] = col_properties[col]['label']
+        if DISPLAY_KEY in col_properties[col] and col_properties[col][DISPLAY_KEY]:
+            if LABEL_KEY in col_properties[col]:
+                cols[col] = col_properties[col][LABEL_KEY]
+            else:
+                cols[col] = str(col)
             if col not in df_cols:
                 df[col] = [col_properties[col]['default']] * num_rows
 
