@@ -692,3 +692,66 @@
   stderr:
     contains:
       - "n_threads (0) needs to be at least 1."
+
+- name: Partition Column - Country
+  tags:
+    - parition_column
+    - parition_column_country
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col country --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "host"
+      must_not_contain:
+        - "count_country_Canada"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\tOutbreakID\tCountry of collection\tState or Province\tgas_denovo_cluster_address"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      should_exist: false
+    - path: "results/Australia/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "K\tAustralia|1.1.1.1.1"
+        - "L\tAustralia|1.1.1.1.2"
+        - "M\tAustralia|1.1.1.2.3"
+    - path: "results/Canada/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\tCanada|1.1.1.1.1"
+        - "B\tCanada|1.1.1.1.2"
+        - "E\tCanada|1.1.2.2.3"
+        - "F\tCanada|1.1.2.2.4"
+    - path: "results/United_Kingdom/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\tUnited Kingdom|1.1.1.1.1"
+        - "J\tUnited Kingdom|1.1.1.1.2"
+    - path: "results/United_States/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\tUnited States|1.1.1.1.1"
+        - "D\tUnited States|1.1.1.1.2"
+        - "G\tUnited States|1.1.2.2.3"
+        - "H\tUnited States|1.1.2.2.4"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "country"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'

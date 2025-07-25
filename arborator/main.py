@@ -228,7 +228,8 @@ def write_outliers(outliers,outfile):
 def stage_data(groups,outdir,metadata_df,id_col,max_missing_frac=1):
     files = {}
     for group_id in groups:
-        d = os.path.join(outdir,f"{group_id}")
+        group_id_no_spaces = str(group_id).replace(" ", "_")
+        d = os.path.join(outdir, group_id_no_spaces)
         if not os.path.isdir(d):
             os.makedirs(d, 0o755)
 
