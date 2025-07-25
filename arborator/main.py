@@ -15,6 +15,7 @@ from arborator.classes.split_profiles import split_profiles
 from genomic_address_service.classes.multi_level_clustering import multi_level_clustering
 from genomic_address_service.utils import format_threshold_map, write_threshold_map
 from genomic_address_service.mcluster import write_clusters
+from genomic_address_service.constants import CLUSTER_METHODS
 import fastparquet as pq
 from multiprocessing import Pool, cpu_count
 
@@ -91,9 +92,7 @@ ONLY_REPORT_LABELED_KEY = "only_report_labeled_columns"
 ONLY_REPORT_LABELED_LONG = "--" + ONLY_REPORT_LABELED_KEY
 
 GROUPED_METADATA_COLUMNS_KEY = "grouped_metadata_columns"
-
 LINELIST_COLUMNS_KEY = "linelist_columns"
-
 DISPLAY_KEY = "display"
 
 PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
@@ -251,7 +250,7 @@ def stage_data(groups,outdir,metadata_df,id_col,max_missing_frac=1):
                 os.remove(files[group_id][fname])
 
         df = remove_columns(groups[group_id], '0', max_missing_frac=max_missing_frac)
-        df.to_csv(files[group_id]['profile'], sep="\t", header=True, index=False)
+        df.to_csv(files[group_id][PROFILE_KEY], sep="\t", header=True, index=False)
         metadata_df[metadata_df[id_col].isin(list(groups[group_id][id_col]))].to_csv(files[group_id]['metadata'], sep="\t", header=True, index=False)
 
     return files
@@ -284,7 +283,7 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, 
     return r
 
 def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thresh,method,min_members=2):
-    (allele_map, df) = process_profile(output_files['profile'], column_mapping={})
+    (allele_map, df) = process_profile(output_files[PROFILE_KEY], column_mapping={})
     l, p = convert_profiles(df)
     min_dist = 0
     mean_dist = 0
@@ -292,7 +291,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
     max_dist = 0
     outliers = {}
     outlier_ids = []
-    metadata_summary = report(read_data(output_files['metadata']).df,[id_col,group_col]).get_data()
+    metadata_summary = report(read_data(output_files[METADATA_KEY]).df,[id_col,group_col]).get_data()
 
     if len(l) >= min_members:
         # compute distances
@@ -325,8 +324,8 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
             clust_df['address'] = values
             clust_df = clust_df.rename(columns={'id': id_col,'address':'gas_denovo_cluster_address'})
             clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)     
-            metadata_df = pd.read_csv(output_files['metadata'],sep="\t",header=0)
-            pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files['metadata'],sep="\t",header=True,index=False)
+            metadata_df = pd.read_csv(output_files[METADATA_KEY],sep="\t",header=0)
+            pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False)
             del(clust_df)
             del(metadata_df)
 
@@ -571,7 +570,7 @@ def cluster_reporter(config):
 
     thresholds = process_thresholds(thresholds)
 
-    if not method in ['average','complete','single']:
+    if not method in CLUSTER_METHODS:
         print(f'Linkage method supplied is invalid: {method}, it needs to be one of average, single, complete')
         sys.exit()
 
