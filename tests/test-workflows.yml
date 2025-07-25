@@ -755,3 +755,68 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Partition Column - state/province
+  tags:
+    - parition_column
+    - parition_column_state_province
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col "state/province" --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "host"
+      must_not_contain:
+        - "count_country_Ontario"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\tOutbreakID\tCountry of collection\tState or Province\tgas_denovo_cluster_address"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      should_exist: false
+    - path: "results/British_Columbia/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "B\tBritish Columbia|1.1.1.1.1"
+        - "F\tBritish Columbia|1.1.2.2.2"
+    - path: "results/England/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\tEngland|1.1.1.1.1"
+        - "J\tEngland|1.1.1.1.2"
+    - path: "results/New_York/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\tNew York|1.1.2.2.3"
+        - "G\tNew York|1.1.1.1.1"
+        - "H\tNew York|1.1.1.1.2"
+    - path: "results/NSW/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "K\tNSW|1.1.1.1.1"
+        - "L\tNSW|1.1.1.1.2"
+        - "M\tNSW|1.1.1.2.3"
+    - path: "results/Ontario/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\tOntario|1.1.1.1.1"
+        - "E\tOntario|1.1.2.2.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "state/province"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
