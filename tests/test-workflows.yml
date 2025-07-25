@@ -2,6 +2,8 @@
   command: arborator --help
 
 - name: Basic arborator test
+  tags:
+    - basic
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
   stdout:
     must_not_contain:
@@ -626,3 +628,54 @@
     - path: "results/run.json"
       contains:
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Specifying Parameters on Command-Line - Booleans
+  tags:
+    - specify_parameters_on_command_line
+    - specify_parameters_on_command_line_booleans
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id --count_missing --skip_qc --force --only_report_labeled
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/run.json"
+      contains:
+        - '"only_report_labeled_columns": true'
+        - '"count_missing": true'
+        - '"skip_qc": true'
+        - '"force": true'
+
+- name: Specifying Booleans in Config - True
+  tags:
+    - config
+    - config_booleans_true
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_booleans_true.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/run.json"
+      contains:
+        - '"only_report_labeled_columns": true'
+        - '"count_missing": true'
+        - '"skip_qc": true'
+        - '"force": true'
+
+- name: Specifying Booleans in Config - False
+  tags:
+    - config
+    - config_booleans_false
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_booleans_false.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/run.json"
+      contains:
+        - '"only_report_labeled_columns": false'
+        - '"count_missing": false'
+        - '"skip_qc": false'
+        - '"force": false'
