@@ -940,3 +940,85 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Metadata Summary - Categorical
+  tags:
+    - metadata
+    - metadata_summary_categorical
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_summarize_categorical.tsv --config tests/data/config_summarize_categorical.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\trandom"
+        - "1\tcat,dog,potato,tomato"
+        - "2\tcat,fish"
+        - "3\tdog,mouse"
+        - "4\tcat,mouse"
+        - "5\tcat"
+        - "count_random_cat"
+        - "count_random_dog"
+        - "count_random_potato"
+        - "count_random_tomato"
+        - "count_random_fish"
+        - "count_random_mouse"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\trandom\tgas_denovo_cluster_address"
+        - "A\tcat\t1|1.1.1.1.1"
+        - "B\tdog\t1|1.1.1.1.2"
+        - "K\ttomato\t1|1.1.1.2.3"
+        - "L\tpotato\t1|1.1.1.2.4"
+        - "M\tdog\t1|1.1.1.1.1"
+        - "C\tcat\t2|1.1.1.1.1"
+        - "D\tfish\t2|1.1.1.1.2"
+        - "E\tdog\t3|1.1.1.1.1"
+        - "F\tmouse\t3|1.1.1.1.2"
+        - "G\tmouse\t4|1.1.1.1.1"
+        - "H\tcat\t4|1.1.1.1.2"
+        - "I\tcat\t5|1.1.1.1.1"
+        - "J\tcat\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
