@@ -1234,3 +1234,77 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Duplicated Data
+  tags:
+    - duplicated_data
+  command: arborator --profile tests/data/profile_duplicated.tsv --metadata tests/data/metadata_duplicated.tsv --config tests/data/config.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.2"
+        - "B\t1|1.1.1.1.1"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.2"
+        - "N\t1|1.1.1.1.2"
+        - "O\t1|1.1.1.1.1"
+        - "X\t1|1.1.1.2.3"
+        - "Y\t1|1.1.1.2.4"
+        - "Z\t1|1.1.1.1.2"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+        - "P\t2|1.1.1.1.1"
+        - "Q\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+        - "R\t3|1.1.1.1.1"
+        - "S\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+        - "T\t4|1.1.1.1.1"
+        - "U\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+        - "V\t5|1.1.1.1.1"
+        - "W\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM\tN\tO\tX\tY\tZ"
+        - "A\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+        - "N\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+        - "O\t1\t0\t2\t2\t1\t1\t0\t2\t2\t1"
+        - "X\t2\t2\t0\t1\t2\t2\t2\t0\t1\t2"
+        - "Y\t2\t2\t1\t0\t2\t2\t2\t1\t0\t2"
+        - "Z\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
