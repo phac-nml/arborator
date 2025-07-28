@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.6] - 2025-05-23
+## [1.1.0] - 2025-07-28
 
 ### Added
 - Numerous pytest workflow tests. [PR #18](https://github.com/phac-nml/arborator/pull/18)
@@ -34,3 +34,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An empty `tests.py` file in the root directory. [PR #15](https://github.com/phac-nml/arborator/pull/15)
 
 [1.0.6]: https://github.com/phac-nml/arborator/releases/tag/1.0.6
+[1.1.0]: https://github.com/phac-nml/arborator/releases/tag/1.1.0
