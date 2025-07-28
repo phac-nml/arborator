@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.6] - 2025-05-23
 
 ### Added
+- Numerous pytest workflow tests. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- Warnings for currently unused parameters, incorrect parameters. Exceptions for parameter errors. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- Enforcing that thresholds must be strictly decreasing. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- Generally improved program robustness. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+
+### Fixed
+- GitHub Workflow CI repository name. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- Corrected and consolidated variable names in README, config.json examples. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- Conflicts when running multiple runs in a row in the same Python execution. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- A bug with hiding metadata. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- Consolidated true/false boolean/string handling. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+- A bug where min_members was always 2. [PR #18](https://github.com/phac-nml/arborator/pull/18)
+
+## [1.0.6] - 2025-05-23
+
+### Added
 - GitHub Workflows CI. [PR #15](https://github.com/phac-nml/arborator/pull/15)
 - Very simple pytest-workflows testing. [PR #15](https://github.com/phac-nml/arborator/pull/15)
 
