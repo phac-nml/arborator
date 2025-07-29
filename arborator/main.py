@@ -18,6 +18,7 @@ from genomic_address_service.mcluster import write_clusters
 import fastparquet as pq
 from multiprocessing import Pool, cpu_count
 
+
 def parse_args():
     """ Argument Parsing method.
 
@@ -330,6 +331,7 @@ def validate_params(config):
 
 
 def cluster_reporter(config):
+    sys.setrecursionlimit(100000)
     validate_params(config)
     profile_file = config['profile']
     partition_file = config['metadata']

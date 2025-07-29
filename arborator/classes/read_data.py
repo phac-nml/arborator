@@ -24,10 +24,11 @@ class read_data:
         status = True
         if not os.path.isfile(f):
             status = False
-        elif self.get_file_length(f) < 2:
-            status = False
         elif os.path.getsize(f) < self.MIN_FILE_SIZE:
             status = False
+        elif self.get_file_length(f) < 2:
+            status = False
+
 
         return status
 
@@ -37,7 +38,10 @@ class read_data:
         :param f: string path to file
         :return: int
         '''
-        return int(os.popen(f'wc -l {f}').read().split()[0])
+        result = os.popen(f'wc -l {f}').read().split()
+        if len(result) == 0:
+            return 0
+        return int(result[0])
 
     def process_profile(self,file_path, format="text"):
         '''
@@ -56,5 +60,7 @@ class read_data:
                 columns=None,
                 storage_options=None,
             )
+        else:
+            df =pd.DataFrame()
 
         return df
