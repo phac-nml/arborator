@@ -4,7 +4,7 @@
 - name: Basic arborator test
   tags:
     - basic
-  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results
   stdout:
     must_not_contain:
       - "parameter unrecognized"
@@ -314,7 +314,7 @@
   tags:
     - test_config
     - test_config_parition_does_not_exist
-  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_bad_partition.json --outdir results --thresholds 3,2,1
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_bad_partition.json --outdir results
   exit_code: 1
   stderr:
     contains:
