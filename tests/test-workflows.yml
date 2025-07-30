@@ -24,16 +24,24 @@
         - "M\t1|1.1.1.1.1"
     - path: "results/2/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
     - path: "results/3/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
     - path: "results/4/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
     - path: "results/5/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
     - path: "results/1/matrix.tsv"
       contains:
         - "dists\tA\tB\tK\tL\tM"
@@ -114,16 +122,24 @@
         - "M\t1|1.1.1.1.1.1.1.1.1.1"
     - path: "results/2/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1.1.1.1.1.1"
+        - "D\t2|1.1.1.1.1.1.1.1.1.1"
     - path: "results/3/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1.1.1.1.1.1"
+        - "F\t3|1.1.1.1.1.1.1.1.1.1"
     - path: "results/4/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1.1.1.1.1.1"
+        - "H\t4|1.1.1.1.1.1.1.1.1.1"
     - path: "results/5/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1.1.1.1.1.1"
+        - "J\t5|1.1.1.1.1.1.1.1.1.1"
     - path: "results/1/matrix.tsv"
       contains:
         - "dists\tA\tB\tK\tL\tM"
@@ -239,16 +255,24 @@
         - "M\t1|1.1.1.1.1"
     - path: "results/2/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
     - path: "results/3/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
     - path: "results/4/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
     - path: "results/5/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
     - path: "results/1/matrix.tsv"
       contains:
         - "dists\tA\tB\tK\tL\tM"
@@ -426,16 +450,24 @@
         - "M\t1|1.1.1.1.1"
     - path: "results/2/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
     - path: "results/3/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
     - path: "results/4/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
     - path: "results/5/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
     - path: "results/1/matrix.tsv"
       contains:
         - "dists\tA\tB\tK\tL\tM"
@@ -486,14 +518,24 @@
         - "M\t1|1.1.1.1.1"
     - path: "results/2/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
     - path: "results/3/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
     - path: "results/4/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
     - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
       contains:
         - "gas_denovo_cluster_address"
     - path: "results/1/matrix.tsv"
