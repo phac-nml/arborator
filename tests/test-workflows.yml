@@ -11,9 +11,12 @@
   files:
     - path: "results/cluster_summary.tsv"
       contains:
-        - "OutbreakID"
-        - "count_country_Canada"
-        - "host"
+        - "OutbreakID\tcount_country_Australia\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_NSW\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t3\t2\t0\t0\t3\t2\t5\t5\t0\t1\t0\t0\t3\t0\t1\tchicken,human\t2.0\t1.5\t2.0\t0.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t0\t1\t0\tchicken\t1.0\t1.0\t1.0\t1.0\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t0\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t0\t1\tchicken,human\t1.0\t1.0\t1.0\t1.0\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t0\t2\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t0\t2\t0\t0\t2\t2\t2\t0\t0\t0\t2\t0\t0\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
     - path: "results/1/clusters.tsv"
       contains:
         - "sample_id\tgas_denovo_cluster_address"
