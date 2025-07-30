@@ -21,7 +21,8 @@ class split_profiles:
             raise Exception(message)
 
         data_frame = data_frame.dropna(subset=[partition_col])
-        self.partitions = dict(zip(data_frame[id_col].values.tolist(), data_frame[partition_col].values.tolist()))
+        data_frame = data_frame[[id_col, partition_col]].set_index(id_col)
+        self.partitions = data_frame.to_dict()[partition_col]
 
     def create_groups(self):
         self.groups = {}
