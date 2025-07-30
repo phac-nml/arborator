@@ -436,8 +436,8 @@ def validate_params(config):
         if p not in config or config[p] == '' or config[p] == None:
             missing.append(p)
     if len(missing) > 0:
-        print(f"Error, parameters not set for: {missing}")
-        sys.exit()
+        message = f"Error, parameters not set for: {missing}"
+        raise Exception(message)
 
     for key in config.keys():
         # Check for any unexpected config keys:
@@ -560,19 +560,19 @@ def cluster_reporter(config):
         display_cluster_header = [partition_col]
 
     if not os.path.isfile(profile_file):
-        print(f'Profile path {profile_file} does not exist, please check path and try again')
-        sys.exit()
+        message = f'Profile path {profile_file} does not exist, please check path and try again'
+        raise Exception(message)
 
     if not os.path.isfile(partition_file):
-        print(f'Metadata file {partition_file} does not exist, please check path and try again')
-        sys.exit()
+        message = f'Metadata file {partition_file} does not exist, please check path and try again'
+        raise Exception(message)
 
     if not isinstance(outlier_thresh,int) or not isinstance(outlier_thresh,float):
         try:
             outlier_thresh = float(outlier_thresh)
         except:
-            print(f'Outlier threshold needs to be numeric: {outlier_thresh}')
-            sys.exit()
+            message = f'Outlier threshold needs to be numeric: {outlier_thresh}'
+            raise Exception(message)
 
     if not isinstance(thresholds,list):
         thresholds = thresholds.split(',')
@@ -580,23 +580,23 @@ def cluster_reporter(config):
     thresholds = process_thresholds(thresholds)
 
     if not method in CLUSTER_METHODS:
-        print(f'Linkage method supplied is invalid: {method}, it needs to be one of average, single, complete')
-        sys.exit()
+        message = f'Linkage method supplied is invalid: {method}, it needs to be one of average, single, complete'
+        raise Exception(message)
 
     if not isinstance(min_members, int):
         try:
             min_members = int(min_members)
         except:
-            print(f'Min members needs to be an integer {min_members}')
-            sys.exit()
+            message = f'Min members needs to be an integer {min_members}'
+            raise Exception(message)
 
     if min_members < 2:
         message = f'{MINIMUM_MEMBERS_KEY} ({min_members}) needs to be at least 2.'
         raise Exception(message)
 
     if not force and os.path.isdir(outdir):
-        print(f'folder {outdir} already exists, please choose new directory or use --force')
-        sys.exit()
+        message = f'folder {outdir} already exists, please choose new directory or use --force'
+        raise Exception(message)
 
     # initialize analysis directory
     if not os.path.isdir(outdir):
@@ -774,8 +774,8 @@ def main():
     if config_file is not None:
 
         if not os.path.isfile(config_file):
-            print(f'Config path {config_file} does not exist, please check path and try again')
-            sys.exit()
+            message = f'Config path {config_file} does not exist, please check path and try again'
+            raise Exception(message)
 
         with open(config_file) as fh:
             c = json.loads(fh.read())
@@ -783,12 +783,12 @@ def main():
                 config[field] = c[field]
 
     if not OUTLIER_THRESHOLD_KEY in config or config[OUTLIER_THRESHOLD_KEY] == '':
-        print(f'Error you must supply an outlier threshold as a cmd line parameter or in the config file')
-        sys.exit()
+        message = f'Error you must supply an outlier threshold as a cmd line parameter or in the config file'
+        raise Exception(message)
 
     if not THRESHOLDS_KEY in config or config[THRESHOLDS_KEY] == '':
-        print(f'Error you must supply a threshold as a cmd line parameter or in the config file')
-        sys.exit()
+        message = f'Error you must supply a threshold as a cmd line parameter or in the config file'
+        raise Exception(message)
 
     cluster_reporter(config)
 

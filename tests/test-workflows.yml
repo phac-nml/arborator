@@ -200,36 +200,39 @@
     - file_handling
     - file_handling_missing_profile
   command: arborator --profile tests/data/profile_file_does_not_exist.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Profile path tests/data/profile_file_does_not_exist.tsv does not exist, please check path and try again"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Profile path tests/data/profile_file_does_not_exist.tsv does not exist, please check path and try again"
 
 - name: Test File Handling - Missing metadata
   tags:
     - file_handling
     - file_handling_missing_metadata
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_file_does_not_exist.tsv --config tests/data/config.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Metadata file tests/data/metadata_file_does_not_exist.tsv does not exist, please check path and try again"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Metadata file tests/data/metadata_file_does_not_exist.tsv does not exist, please check path and try again"
 
 - name: Test File Handling - Missing config
   tags:
     - file_handling
     - file_handling_missing_config
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_file_does_not_exist.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Config path tests/data/config_file_does_not_exist.json does not exist, please check path and try again"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Config path tests/data/config_file_does_not_exist.json does not exist, please check path and try again"
 
 - name: Test Specifying Parameters on Command-Line
   tags:
@@ -293,24 +296,26 @@
     - test_config
     - test_config_outlier_threshold_NAN
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_outlier_threshold_NAN.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Outlier threshold needs to be numeric: notanumber"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Outlier threshold needs to be numeric: notanumber"
 
 - name: Test Config - Invalid Method
   tags:
     - test_config
     - test_config_invalid_method
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_invalid_method.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Linkage method supplied is invalid: invalid_method_DNE, it needs to be one of average, single, complete"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Linkage method supplied is invalid: invalid_method_DNE, it needs to be one of average, single, complete"
 
 - name: Test Config - Thresholds Not a Number
   tags:
@@ -327,12 +332,13 @@
     - test_config
     - test_config_min_members_NAN
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_min_members_NAN.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Min members needs to be an integer notanumber"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Min members needs to be an integer notanumber"
 
 - name: Test Config - partition_col Does Not Exist
   tags:
@@ -349,24 +355,26 @@
     - test_config
     - test_config_parition_not_specified
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_partition.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Error, parameters not set for: ['partition_col']"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Error, parameters not set for: ['partition_col']"
 
 - name: Test Config - ID Column Missing
   tags:
     - test_config
     - test_config_id_column_missing
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_id_column_missing.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Error, parameters not set for: ['id_col']"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Error, parameters not set for: ['id_col']"
 
 - name: Test Config - Only Report Labeled Columns Not Boolean
   tags:
@@ -385,12 +393,13 @@
     - test_config
     - test_config_multiple_parameters_not_specified
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_missing_multiple_parameters.json --outdir results
-  exit_code: 0
+  exit_code: 1
   stdout:
-    contains:
-      - "Error, parameters not set for: ['id_col', 'partition_col']"
     must_not_contain:
       - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Error, parameters not set for: ['id_col', 'partition_col']"
 
 - name: Command-Line Parameter Warnings
   tags:
