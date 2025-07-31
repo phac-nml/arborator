@@ -1,0 +1,9 @@
+{
+    "grouped_metadata_columns":{
+        "replace":{ "data_type": "None"}
+    },
+
+    "linelist_columns":{
+        "replace":{ "data_type": "None"}
+    }
+}

@@ -1,0 +1,14 @@
+sample_id	replace
+A	abAByzZy
+B	abAByzZy
+C	A-Z-Y
+D	A-Z.Y
+E	0_9.1-8
+F	0_9.1-8
+G	&89AZ@[]
+H	&89AZ@[]
+I	collision-)()!@#$%
+J	collision-)()!@#$%
+K	collision-*()!@#$%
+L	collision-*()!@#$%
+M	cluster size 1 will be removed

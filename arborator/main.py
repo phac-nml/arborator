@@ -226,23 +226,24 @@ def write_outliers(outliers,outfile):
         for row in outliers:
             f.write("{}\n".format("\t".join([str(x) for x in row])))
 
-def stage_data(groups,outdir,metadata_df,id_col,max_missing_frac=1):
+def stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_missing_frac=1):
     files = {}
     for group_id in groups:
-        group_id_no_spaces = str(group_id).replace(" ", "_")
-        d = os.path.join(outdir, group_id_no_spaces)
-        if not os.path.isdir(d):
-            os.makedirs(d, 0o755)
+        directory_name = group_file_mapping[group_id]
+        directory_path = os.path.join(outdir,f"{directory_name}")
+
+        if not os.path.isdir(directory_path):
+            os.makedirs(directory_path, 0o755)
 
         files[group_id] = {
-            "profile": os.path.join(d, "profile.tsv"),
-            "parquet_matrix": os.path.join(d, "matrix.pq"),
-            "matrix": os.path.join(d, "matrix.tsv"),
-            "clusters": os.path.join(d, "clusters.tsv"),
-            "metadata": os.path.join(d, "metadata.tsv"),
-            "tree": os.path.join(d, "tree.nwk"),
-            "summary": os.path.join(d, "loci.summary.tsv"),
-            "outliers": os.path.join(d, "outliers.tsv"),
+            "profile": os.path.join(directory_path, "profile.tsv"),
+            "parquet_matrix": os.path.join(directory_path, "matrix.pq"),
+            "matrix": os.path.join(directory_path, "matrix.tsv"),
+            "clusters": os.path.join(directory_path, "clusters.tsv"),
+            "metadata": os.path.join(directory_path, "metadata.tsv"),
+            "tree": os.path.join(directory_path, "tree.nwk"),
+            "summary": os.path.join(directory_path, "loci.summary.tsv"),
+            "outliers": os.path.join(directory_path, "outliers.tsv"),
 
         }
 
@@ -477,6 +478,7 @@ def cluster_reporter(config):
     partition_col = config[PARTITION_COLUMN_KEY]
     min_members = config[MINIMUM_MEMBERS_KEY]
     num_threads = config[THREADS_KEY]
+    restrict_output = config[ONLY_REPORT_LABELED_KEY]
 
     # Unused parameters:
     skip_qc = config[SKIP_QC_KEY]
@@ -519,11 +521,6 @@ def cluster_reporter(config):
     run_data = {}
     run_data['analysis_start_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     run_data['parameters'] = config
-
-    if ONLY_REPORT_LABELED_KEY in config:
-        restrict_output = config[ONLY_REPORT_LABELED_KEY]
-    else:
-        restrict_output = False
 
     linelist_cols_properties = {}
     line_list_columns = []
@@ -631,7 +628,10 @@ def cluster_reporter(config):
     ovl_samples = list(ovl_samples)
 
     metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False)
-    groups = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col).subsets
+    split = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col)
+    groups = split.subsets
+    group_file_mapping = split.group_file_mapping
+
     filtered_samples = pd.concat(list(groups.values()), ignore_index=True)[id_col].to_list()
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(filtered_samples)], columns=[])
     ll_cols = list(set(linelist_df.columns.to_list()))
@@ -660,7 +660,7 @@ def cluster_reporter(config):
     with open(os.path.join(outdir,"threshold_map.json"),'w' ) as fh:
         fh.write(json.dumps(run_data['threshold_map'], indent=4))
 
-    group_files = stage_data(groups, outdir, metadata_df, id_col, max_missing_frac=1)
+    group_files = stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_missing_frac=1)
     results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, num_threads)
     group_metrics = {}
     for r in results:
@@ -691,7 +691,7 @@ def cluster_reporter(config):
         if col in display_columns:
             continue
         display_columns.append(col)
-        
+
     summary_df = summary_df[display_columns]
     for k in cluster_display_cols_to_remove:
         del(cluster_summary_cols_properties[k])
@@ -710,22 +710,25 @@ def cluster_reporter(config):
         line_list_columns.append('gas_denovo_cluster_address')
 
     metadata_dfs = []
-
     for group_id in group_files:
         #remove parquet file
         num_members = 0
         f = group_files[group_id]['parquet_matrix']
+
         if os.path.isfile(f):
             os.remove(f)
-        f = group_files[group_id][ "metadata"]
+        f = group_files[group_id]["metadata"]
+
         if os.path.isfile(f):
             obj = read_data(f)
+
             if obj.status:
                 num_members = len(obj.df)
                 metadata_dfs.append(obj.df)
-        if num_members < min_members:
-            shutil.rmtree(os.path.join(outdir,group_id))
 
+        if num_members < min_members:
+            directory_name = group_file_mapping[group_id]
+            shutil.rmtree(os.path.join(outdir, directory_name))
 
     linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
 

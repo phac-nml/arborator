@@ -1356,3 +1356,59 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Removing Special Characters From File Paths
+  tags:
+    - special_characters
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_replace_special.tsv --config tests/data/config_replace_special.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col replace --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "replace\tcount_members\tcount_outliers\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids"
+        - "abAByzZy\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "A-Z-Y\t1\t0\t0\t0\t0\t0"
+        - "A-Z.Y\t1\t0\t0\t0\t0\t0"
+        - "0_9.1-8\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "&89AZ@[]\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "collision-)()!@#$%\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "collision-*()!@#$%\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "cluster size 1 will be removed\t1\t0\t0\t0\t0\t0"
+    - path: "results/_89AZ___/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t&89AZ@[]|1.1.1.1.1"
+        - "H\t&89AZ@[]|1.1.1.1.2"
+    - path: "results/0_9.1-8/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t0_9.1-8|1.1.1.1.1"
+        - "F\t0_9.1-8|1.1.1.1.2"
+    - path: "results/abAByzZy/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\tabAByzZy|1.1.1.1.1"
+        - "B\tabAByzZy|1.1.1.1.2"
+    - path: "results/collision-________/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\tcollision-)()!@#$%|1.1.1.1.1"
+        - "J\tcollision-)()!@#$%|1.1.1.1.2"
+    - path: "results/collision-________-1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "K\tcollision-*()!@#$%|1.1.1.1.1"
+        - "L\tcollision-*()!@#$%|1.1.1.1.2"
+    - path: "results/_89AZ___/matrix.tsv"
+      contains:
+        - "dists\tG\tH"
+        - "G\t0\t1"
+        - "H\t1\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "replace"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'

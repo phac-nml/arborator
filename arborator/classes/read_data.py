@@ -3,8 +3,7 @@ import os
 
 class read_data:
 
-    def __init__(self,input_file,MIN_FILE_SIZE=32):
-        self.MIN_FILE_SIZE = MIN_FILE_SIZE
+    def __init__(self,input_file):
         self.input_file = input_file
         self.status = self.is_file_ok(self.input_file)
         self.messages = []
@@ -17,7 +16,7 @@ class read_data:
 
     def is_file_ok(self,f):
         '''
-        Helper function to determine MIN_FILE_SIZEif a profile file exists, has a header and >= 1 row of data
+        Helper function to determine if a profile file exists, has a header and >= 1 row of data
         :param f:
         :return: True on success
         '''
@@ -25,8 +24,6 @@ class read_data:
         if not os.path.isfile(f):
             status = False
         elif self.get_file_length(f) < 2:
-            status = False
-        elif os.path.getsize(f) < self.MIN_FILE_SIZE:
             status = False
 
         return status
