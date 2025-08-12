@@ -473,9 +473,16 @@ def cluster_reporter(config):
         fh.write(json.dumps(allele_map, indent=4))
 
     metadata = read_data(partition_file)
+    if not metadata.status:
+        print(f'Error processing {partition_file} metadata file')
+        sys.exit()
+        
     metadata_df = metadata.df
+
     if id_col in list(metadata_df.columns):
         metadata_df[id_col] = metadata_df[id_col].astype(str)
+    else:
+        print(f'Error id column "{id_col}" is not found in {partition_file} header. columns: {metadata_df.columns}')
 
     input_profile_samples = set(profile_df[id_col])
     input_metadata_samples = set(metadata_df[id_col])
@@ -622,7 +629,6 @@ def main():
     if not 'thresholds' in config or config['thresholds'] == '':
         print(f'Error you ust supply a threshold as a cmd line parameter or in the config file')
         sys.exit()
-
 
     cluster_reporter(config)
 
