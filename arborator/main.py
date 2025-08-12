@@ -191,7 +191,6 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method,n
 def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thresh,method,min_members=2):
     (allele_map, df) = process_profile(output_files['profile'], column_mapping={})
     l, p = convert_profiles(df)
-    l = [str(x) for x in l]
     min_dist = 0
     mean_dist = 0
     med_dist = 0
