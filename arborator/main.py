@@ -224,7 +224,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         if os.path.isfile(output_files['clusters']) and os.path.isfile(output_files["metadata"]):
             clust_df = pd.read_csv(output_files['clusters'],sep="\t",header=0)
             clust_df = clust_df[['id','address']]
-            values = clust_df['address']
+            values = list(clust_df['address'])
             for idx,value in enumerate(values):
                 values[idx] = f'{group_id}|{value}'
             clust_df['address'] = values
@@ -465,13 +465,24 @@ def cluster_reporter(config):
     (allele_map, profile_df) = process_profile(profile_file, column_mapping={})
     profile_df = profile_df.copy()
     profile_df.insert(0, id_col, profile_df.index.to_list())
+    if id_col in list(profile_df.columns):
+        profile_df[id_col] = profile_df[id_col].astype(str)
 
     #write allele mapping file
     with open(os.path.join(outdir,"allele_map.json"),'w' ) as fh:
         fh.write(json.dumps(allele_map, indent=4))
 
     metadata = read_data(partition_file)
+    if not metadata.status:
+        print(f'Error processing {partition_file} metadata file')
+        sys.exit()
+        
     metadata_df = metadata.df
+
+    if id_col in list(metadata_df.columns):
+        metadata_df[id_col] = metadata_df[id_col].astype(str)
+    else:
+        print(f'Error id column "{id_col}" is not found in {partition_file} header. columns: {metadata_df.columns}')
 
     input_profile_samples = set(profile_df[id_col])
     input_metadata_samples = set(metadata_df[id_col])
@@ -485,9 +496,9 @@ def cluster_reporter(config):
     run_data['count_missing_metadata_samples'] = len(missing_metadata_samples)
     run_data['missing_metadata_samples'] = ",".join(sorted(list(missing_metadata_samples)))
     ovl_samples = list(ovl_samples)
-
     metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False)
     groups = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col).subsets
+
     filtered_samples = pd.concat(list(groups.values()), ignore_index=True)[id_col].to_list()
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(filtered_samples)], columns=[])
     ll_cols = list(set(linelist_df.columns.to_list()))
@@ -508,6 +519,7 @@ def cluster_reporter(config):
         line_list_columns = t
 
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(list(set(metadata_df[id_col].to_list()) - set(filtered_samples)))], columns=[])
+
     linelist_df = linelist_df[line_list_columns]
     linelist_df.to_csv(os.path.join(outdir, "metadata.excluded.tsv"), sep="\t", header=True, index=False)
     del(linelist_df)
@@ -617,7 +629,6 @@ def main():
     if not 'thresholds' in config or config['thresholds'] == '':
         print(f'Error you ust supply a threshold as a cmd line parameter or in the config file')
         sys.exit()
-
 
     cluster_reporter(config)
 

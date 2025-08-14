@@ -1,7 +1,7 @@
 import sys
 from statistics import mean, median
 import pandas as pd
-
+import math
 
 class summarizer:
     valid_types = [
@@ -67,21 +67,19 @@ class summarizer:
         return record
 
 
-    def calc_desc_stats_numerical(self,values):
-        s = {
-            'min':0,
-            'median':0,
-            'mean':0,
-            'max':0,
+    def calc_desc_stats_numerical(self, values):
+        # Keep only ints and floats
+        numeric_values = sorted(v for v in values if isinstance(v, (int, float)))
+
+        if not numeric_values:
+            return {'min': 0, 'median': 0, 'mean': 0, 'max': 0}
+
+        return {
+            'min': numeric_values[0],
+            'median': median(numeric_values),
+            'mean': mean(numeric_values),
+            'max': numeric_values[-1],
         }
-        if len(values) > 0:
-            s = {
-                'min': min(values),
-                'median': mean(values),
-                'mean': median(values),
-                'max':max(values),
-            }
-        return s
 
     def calc_desc_stats_dates(self,values):
         values = sorted(self.convert_date(values))
@@ -157,8 +155,8 @@ class summarizer:
                             if self.is_numbers(values):
                                 values = []
                                 for k in data[col][field_name_value]:
-
                                     values += [float(k)] * data[col][field_name_value][k]
+                                values = [v for v in values if isinstance(v, (int, float)) and not math.isnan(v)]
                                 dstats = self.calc_desc_stats_numerical(values)
                             else:
                                 if self.is_date(list(data[col][field_name_value].keys())):

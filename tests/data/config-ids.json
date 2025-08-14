@@ -1,0 +1,21 @@
+{
+	"outlier_thresh": "50",
+	"clustering_method": "average",
+	"clustering_threshold": "30,25,20,15,10",
+	"min_cluster_members": 2,
+	"partition_column_name": "NATIONAL_OUTBREAK_CODE_NAME",
+	"id_column_name": "SAMPLE_NAME",
+	"only_report_labeled_columns": "True",
+	"skip_qa": "False",
+
+	"grouped_metadata_columns":{
+
+
+	},
+	"linelist_columns":{
+		"Sample":{ "data_type": "None","label":"Sample","display":"True"}
+
+
+	}
+
+}

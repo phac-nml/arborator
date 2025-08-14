@@ -43,3 +43,21 @@
         - '"id_col": "sample_id"'
         - '"clustering_method": "average"'
         - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
+
+- name: Input identifiers are integers
+  command: arborator --config tests/data/config-ids.json --profile tests/data/data_integer_ids.tsv --metadata tests/data/data_integer_ids.tsv -o integer --force --id_col Sample --partition_col locus_1
+  files:
+  - path: integer/metadata.included.tsv
+    md5sum: 8bd4893973948365c43f27b604ffbaf2
+
+- name: Input identifiers are numeric
+  command: arborator --config tests/data/config-ids.json  --profile tests/data/data_numeric_ids.tsv --metadata tests/data/data_numeric_ids.tsv -o numeric --force --id_col Sample --partition_col locus_1
+  files:
+  - path: numeric/metadata.included.tsv
+    md5sum: 7899a337ad6a2ad9c8e2b81410af787f
+
+- name: Input identifiers are mixed
+  command: arborator --config tests/data/config-ids.json --profile tests/data/data_alphanumeric_ids.tsv --metadata tests/data/data_alphanumeric_ids.tsv -o alphanumeric --force --id_col Sample --partition_col locus_1
+  files:
+  - path: alphanumeric/metadata.included.tsv
+    md5sum: e18f26d4d1c8d609fe58399e99f7ad43

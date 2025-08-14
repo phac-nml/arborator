@@ -59,8 +59,8 @@ setup(
         'pandas>=2.0.2,<2.2.0',
         'psutil',
         'scipy',
-        'profile_dists',
-        'genomic_address_service'
+        'profile_dists>=1.0.8',
+        'genomic_address_service>=0.2.1'
 
     ],
 
