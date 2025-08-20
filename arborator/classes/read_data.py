@@ -24,20 +24,28 @@ class read_data:
         status = True
         if not os.path.isfile(f):
             status = False
-        elif self.get_file_length(f) < 2:
-            status = False
         elif os.path.getsize(f) < self.MIN_FILE_SIZE:
             status = False
+        elif self.is_file_reasonable(f) < 2:
+            status = False
+
 
         return status
 
-    def get_file_length(self,f):
+    def is_file_reasonable(self,f):
         '''
-        Counts the number of lines in a file
+        Read up to first two lines of a file and return true if >= 2
         :param f: string path to file
-        :return: int
+        :return: boolean
         '''
-        return int(os.popen(f'wc -l {f}').read().split()[0])
+        with open("r", encoding="utf-8", errors="replace") as f:
+            # Only read up to 2 lines for efficiency
+            line_count = 0
+            for _ in f:
+                line_count += 1
+                if line_count >= 2:
+                    return True
+        return False
 
     def process_profile(self,file_path, format="text"):
         '''
@@ -56,5 +64,7 @@ class read_data:
                 columns=None,
                 storage_options=None,
             )
+        else:
+            df = pd.DataFrame()
 
         return df

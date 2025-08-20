@@ -20,6 +20,7 @@ class split_profiles:
     def parse_partition_file(self,id_col,partition_col):
         partition = read_data(self.partition_file)
         df = partition.df.dropna(subset=[partition_col])
+        df[id_col] = df[id_col].astype(str)
         self.partitions = dict(zip(df[id_col].values.tolist(), df[partition_col].values.tolist()))
 
 
