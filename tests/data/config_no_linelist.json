@@ -13,13 +13,5 @@
         "organism":{ "data_type": "categorical","label":"Species","default":"","display":"False"}, 
         "score":{ "data_type": "desc_stats","label":"Score","default":"","display":"False"}, 
         "state/province":{ "data_type": "categorical","label":"State or Province","default":"","display":"False"}
-    },
-
-    "linelist_columns":{
-        "sample_id":{ "data_type": "None","label":"Identifier","default":"","display":"True"},  
-        "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  
-        "country":{ "data_type": "categorical","label":"Country of collection","default":"","display":"True"},
-        "state/province":{ "data_type": "categorical","label":"State or Province","default":"","display":"True"}, 
-        "organism":{ "data_type": "categorical","label":"Species","default":"","display":"False"}
-    }
+    }    
 }

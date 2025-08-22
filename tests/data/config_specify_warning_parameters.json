@@ -6,6 +6,11 @@
     "partition_col": "cluster_id",
     "id_col": "sample_id",
     "only_report_labeled_columns": "False",
+    "skip_qc": "True",
+    "missing_thresh": 5,
+    "distm": "scaled",
+    "count_missing": "True",
+    "delimiter": ".",
     
     "grouped_metadata_columns":{ 
         "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  

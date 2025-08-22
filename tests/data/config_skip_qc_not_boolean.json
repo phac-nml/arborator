@@ -6,6 +6,7 @@
     "partition_col": "cluster_id",
     "id_col": "sample_id",
     "only_report_labeled_columns": "False",
+    "skip_qc": "notboolean",
     
     "grouped_metadata_columns":{ 
         "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  

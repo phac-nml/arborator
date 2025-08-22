@@ -5,7 +5,10 @@
     "min_members": 2,
     "partition_col": "cluster_id",
     "id_col": "sample_id",
-    "only_report_labeled_columns": "False",
+    "only_report_labeled_columns": "True",
+    "count_missing": "True",
+    "skip_qc": "True",
+    "force": "True",
     
     "grouped_metadata_columns":{ 
         "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  

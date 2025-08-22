@@ -16,7 +16,7 @@ jobs:
   test:
     name: Run pytest
     # Only run on push if this is the phac-nml dev branch (merged PRs)
-    if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'phac-nml/genomic_address_service') }}"
+    if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'phac-nml/arborator') }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

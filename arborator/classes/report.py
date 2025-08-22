@@ -3,7 +3,7 @@ import sys
 from scipy.stats import entropy
 
 class report:
-    loci = {}
+
     def __init__(self,df,columns_to_skip=[],scale=True,missing_data='0'):
         self.loci = self.get_col_counts(df,columns_to_skip,scale=True,missing_data='0')
         pass

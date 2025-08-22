@@ -6,6 +6,7 @@
     "partition_col": "cluster_id",
     "id_col": "sample_id",
     "only_report_labeled_columns": "False",
+    "UNRECOGNIZED1": "1",
     
     "grouped_metadata_columns":{ 
         "cluster_id":{ "data_type": "None","label":"OutbreakID","default":"","display":"True"},  
@@ -14,6 +15,8 @@
         "score":{ "data_type": "desc_stats","label":"Score","default":"","display":"False"}, 
         "state/province":{ "data_type": "categorical","label":"State or Province","default":"","display":"False"}
     },
+
+    "UNKNOWN2": "2",
 
     "linelist_columns":{
         "sample_id":{ "data_type": "None","label":"Identifier","default":"","display":"True"},  

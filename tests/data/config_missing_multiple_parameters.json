@@ -3,8 +3,6 @@
     "method": "average",
     "thresholds": "10,5,2,1,0",
     "min_members": 2,
-    "partition_col": "cluster_id",
-    "id_col": "sample_id",
     "only_report_labeled_columns": "False",
     
     "grouped_metadata_columns":{ 
