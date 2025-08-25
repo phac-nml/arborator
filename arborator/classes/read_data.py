@@ -2,22 +2,21 @@ import pandas as pd
 import os
 
 class read_data:
-    status = True
-    messages = []
-    def __init__(self,input_file,MIN_FILE_SIZE=32):
-        self.MIN_FILE_SIZE = MIN_FILE_SIZE
+
+    def __init__(self,input_file):
         self.input_file = input_file
-        status = self.is_file_ok(self.input_file)
-        if status:
+        self.status = self.is_file_ok(self.input_file)
+        self.messages = []
+
+        if  self.status:
             self.df = self.process_profile(input_file)
         else:
             self.df = pd.DataFrame()
             self.messages.append(f"Error unable to process {input_file}: is_file:{os.path.isfile(input_file)}")
-        self.status = status
 
     def is_file_ok(self,f):
         '''
-        Helper function to determine MIN_FILE_SIZEif a profile file exists, has a header and >= 1 row of data
+        Helper function to determine if a profile file exists, has a header and >= 1 row of data
         :param f:
         :return: True on success
         '''
@@ -25,8 +24,6 @@ class read_data:
         if not os.path.isfile(f):
             status = False
         elif self.get_file_length(f) < 2:
-            status = False
-        elif os.path.getsize(f) < self.MIN_FILE_SIZE:
             status = False
 
         return status

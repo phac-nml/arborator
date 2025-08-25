@@ -11,9 +11,6 @@ class summarizer:
         'none'
     ]
 
-    header = []
-    data = {}
-
     def __init__(self,header,dictionary,field_data_types,field_name_key,field_name_value):
         self.header = sorted(header + self.get_fields(dictionary,field_data_types,field_name_key,field_name_value))
 
@@ -184,8 +181,6 @@ class summarizer:
         return self.data
 
 class merger:
-    fields = []
-    data = {}
 
     def __init__(self,left_dict,right_dict):
         self.fields = list(set(self.get_fields(left_dict) + self.get_fields(right_dict)))

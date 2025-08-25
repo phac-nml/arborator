@@ -15,8 +15,102 @@ from arborator.classes.split_profiles import split_profiles
 from genomic_address_service.classes.multi_level_clustering import multi_level_clustering
 from genomic_address_service.utils import format_threshold_map, write_threshold_map
 from genomic_address_service.mcluster import write_clusters
+from genomic_address_service.constants import CLUSTER_METHODS
 import fastparquet as pq
 from multiprocessing import Pool, cpu_count
+
+# ARGUMENTS
+PROFILE_KEY = "profile"
+PROFILE_LONG = "--" + PROFILE_KEY
+PROFILE_SHORT = "-p"
+
+METADATA_KEY = "metadata"
+METADATA_LONG = "--" + METADATA_KEY
+METADATA_SHORT = "-r"
+
+CONFIG_KEY = "config"
+CONFIG_LONG = "--" + CONFIG_KEY
+CONFIG_SHORT = "-c"
+
+OUTDIR_KEY = "outdir"
+OUTDIR_LONG = "--" + OUTDIR_KEY
+OUTDIR_SHORT = "-o"
+
+PARTITION_COLUMN_KEY = "partition_col"
+PARTITION_COLUMN_LONG = "--" + PARTITION_COLUMN_KEY
+PARTITION_COLUMN_SHORT = "-a"
+
+ID_COLUMN_KEY = "id_col"
+ID_COLUMN_LONG = "--" + ID_COLUMN_KEY
+ID_COLUMN_SHORT = "-i"
+
+OUTLIER_THRESHOLD_KEY = "outlier_thresh"
+OUTLIER_THRESHOLD_LONG = "--" + OUTLIER_THRESHOLD_KEY
+
+MINIMUM_MEMBERS_KEY = "min_members"
+MINIMUM_MEMBERS_LONG= "--" + MINIMUM_MEMBERS_KEY
+MINIMUM_MEMBERS_SHORT = "-m"
+
+COUNT_MISSING_KEY = "count_missing"
+COUNT_MISSING_LONG = "--" + COUNT_MISSING_KEY
+COUNT_MISSING_SHORT = "-n"
+
+MISSING_THRESHOLD_KEY = "missing_thresh"
+MISSING_THRESHOLD_LONG = "--" + MISSING_THRESHOLD_KEY
+
+DISTANCE_METHOD_KEY = "distm"
+DISTANCE_METHOD_LONG = "--" + DISTANCE_METHOD_KEY
+
+SKIP_QC_KEY = "skip_qc"
+SKIP_QC_LONG = "--" + SKIP_QC_KEY
+SKIP_QC_SHORT = "-s"
+
+THRESHOLDS_KEY = "thresholds"
+THRESHOLDS_LONG = "--" + THRESHOLDS_KEY
+THRESHOLDS_SHORT = "-t"
+
+DELIMITER_KEY = "delimiter"
+DELIMITER_LONG = "--" + DELIMITER_KEY
+DELIMITER_SHORT = "-d"
+
+CLUSTER_METHOD_KEY = "method"
+CLUSTER_METHOD_LONG = "--" + CLUSTER_METHOD_KEY
+CLUSTER_METHOD_SHORT = "-e"
+
+FORCE_KEY = "force"
+FORCE_LONG = "--" + FORCE_KEY
+FORCE_SHORT = "-f"
+
+THREADS_KEY = "n_threads"
+THREADS_LONG = "--" + THREADS_KEY
+
+VERSION_KEY = "version"
+VERSION_LONG = "--" + VERSION_KEY
+VERSION_SHORT = "-V"
+
+ONLY_REPORT_LABELED_KEY = "only_report_labeled_columns"
+ONLY_REPORT_LABELED_LONG = "--" + ONLY_REPORT_LABELED_KEY
+
+GROUPED_METADATA_COLUMNS_KEY = "grouped_metadata_columns"
+LINELIST_COLUMNS_KEY = "linelist_columns"
+DISPLAY_KEY = "display"
+LABEL_KEY = "label"
+
+PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
+                  PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
+                  MINIMUM_MEMBERS_KEY, COUNT_MISSING_KEY, MISSING_THRESHOLD_KEY,
+                  DISTANCE_METHOD_KEY, SKIP_QC_KEY, THRESHOLDS_KEY,
+                  DELIMITER_KEY, CLUSTER_METHOD_KEY, FORCE_KEY, THREADS_KEY,
+                  VERSION_KEY, ONLY_REPORT_LABELED_KEY,
+                  GROUPED_METADATA_COLUMNS_KEY, LINELIST_COLUMNS_KEY]
+
+BOOLEAN_KEYS = [COUNT_MISSING_KEY, SKIP_QC_KEY, FORCE_KEY, ONLY_REPORT_LABELED_KEY]
+
+# Expected to check lowercase:
+TRUE_STRINGS = ["t", "true"]
+
+# Expected to check lowercase:
+FALSE_STRINGS = ["f", "false"]
 
 def parse_args():
     """ Argument Parsing method.
@@ -47,37 +141,38 @@ def parse_args():
     parser = ArgumentParser(
         description="Arborator, an aggregate tool for producing summary reports of genetic distances within groups v. {}".format(__version__),
         formatter_class=CustomFormatter)
-    parser.add_argument('--profile','-p', type=str, required=True, help='Allelic profiles')
-    parser.add_argument('--metadata','-r', type=str, required=True, help='Matched metadata for samples in the allele profile')
-    parser.add_argument('--config', '-c', type=str, required=False,
+    parser.add_argument(PROFILE_LONG, PROFILE_SHORT, type=str, required=True, help='Allelic profiles')
+    parser.add_argument(METADATA_LONG, METADATA_SHORT, type=str, required=True, help='Matched metadata for samples in the allele profile')
+    parser.add_argument(CONFIG_LONG, CONFIG_SHORT, type=str, required=False,
                         help='Configuration json')
-    parser.add_argument('--outdir', '-o', type=str, required=True, help='Result output files')
-    parser.add_argument('--partition_col', '-a', type=str, required=False, help='Metadata column name for aggregating samples' )
-    parser.add_argument('--id_col', '-i', type=str, required=False, help='Sample identifier column' )
-    parser.add_argument('--outlier_thresh', type=float, required=False, help='Threshold to flag outlier comparisons within a group',default=100)
-    parser.add_argument('--min_members','-m', type=int, required=False,
+    parser.add_argument(OUTDIR_LONG, OUTDIR_SHORT, type=str, required=True, help='Result output files')
+    parser.add_argument(PARTITION_COLUMN_LONG, PARTITION_COLUMN_SHORT, type=str, required=False, help='Metadata column name for aggregating samples' )
+    parser.add_argument(ID_COLUMN_LONG, ID_COLUMN_SHORT, type=str, required=False, help='Sample identifier column' )
+    parser.add_argument(OUTLIER_THRESHOLD_LONG, type=float, required=False, help='Threshold to flag outlier comparisons within a group',default=100)
+    parser.add_argument(MINIMUM_MEMBERS_LONG, MINIMUM_MEMBERS_SHORT, type=int, required=False,
                         help='Minimum number of members to perform clustering',default=2)
+    parser.add_argument(ONLY_REPORT_LABELED_LONG, required=False, help='Only report labeled columns',
+                        action='store_true')
 
     #profile dists
-    parser.add_argument('-n', '--count_missing', required=False, help='Count missing as differences',
+    parser.add_argument(COUNT_MISSING_LONG, COUNT_MISSING_SHORT, required=False, help='UNUSED: Count missing as differences',
                         action='store_true')
-    parser.add_argument('--missing_thresh', type=float, required=False,
-                        help='Maximum percentage of missing data allowed per locus (0 - 1)',default=1.0)
-    parser.add_argument('--distm', type=str, required=False, help='Distance method raw hamming or scaled difference [hamming, scaled]',default='scaled')
-    parser.add_argument('-s', '--skip_qc', required=False, help='Skip QA/QC steps',
+    parser.add_argument(MISSING_THRESHOLD_LONG, type=float, required=False,
+                        help='UNUSED: Maximum percentage of missing data allowed per locus (0 - 1)')
+    parser.add_argument(DISTANCE_METHOD_LONG, type=str, required=False, help='UNUSED: Distance method raw hamming or scaled difference [hamming, scaled]')
+    parser.add_argument(SKIP_QC_LONG, SKIP_QC_SHORT, required=False, help='UNUSED: Skip QA/QC steps',
                         action='store_true')
     #GAS
-    parser.add_argument('-t','--thresholds', type=str, required=False, help='thresholds delimited by ,',default='100')
-    parser.add_argument('-d', '--delimeter', type=str, required=False, help='delimeter desired for nomenclature code',
-                        default=".")
-    parser.add_argument('-e', '--method', type=str, required=False, help='cluster method [single, complete, average]',
+    parser.add_argument(THRESHOLDS_LONG, THRESHOLDS_SHORT, type=str, required=False, help='thresholds delimited by ,',default='100')
+    parser.add_argument(DELIMITER_LONG, DELIMITER_SHORT, type=str, required=False, help='UNUSED: delimiter desired for nomenclature code')
+    parser.add_argument(CLUSTER_METHOD_LONG, CLUSTER_METHOD_SHORT, type=str, required=False, help='cluster method [single, complete, average]',
                         default='average')
 
-    parser.add_argument('--force','-f', required=False, help='Overwrite existing directory',
+    parser.add_argument(FORCE_LONG, FORCE_SHORT, required=False, help='Overwrite existing directory',
                         action='store_true')
-    parser.add_argument('--n_threads', type=int, required=False,
+    parser.add_argument(THREADS_LONG, type=int, required=False,
                         help='CPU Threads to use', default=1)
-    parser.add_argument('-V', '--version', action='version', version="%(prog)s " + __version__)
+    parser.add_argument(VERSION_LONG, VERSION_SHORT, action='version', version="%(prog)s " + __version__)
 
     return parser.parse_args()
 
@@ -131,22 +226,24 @@ def write_outliers(outliers,outfile):
         for row in outliers:
             f.write("{}\n".format("\t".join([str(x) for x in row])))
 
-def stage_data(groups,outdir,metadata_df,id_col,max_missing_frac=1):
+def stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_missing_frac=1):
     files = {}
     for group_id in groups:
-        d = os.path.join(outdir,f"{group_id}")
-        if not os.path.isdir(d):
-            os.makedirs(d, 0o755)
+        directory_name = group_file_mapping[group_id]
+        directory_path = os.path.join(outdir,f"{directory_name}")
+
+        if not os.path.isdir(directory_path):
+            os.makedirs(directory_path, 0o755)
 
         files[group_id] = {
-            "profile": os.path.join(d, "profile.tsv"),
-            "parquet_matrix": os.path.join(d, "matrix.pq"),
-            "matrix": os.path.join(d, "matrix.tsv"),
-            "clusters": os.path.join(d, "clusters.tsv"),
-            "metadata": os.path.join(d, "metadata.tsv"),
-            "tree": os.path.join(d, "tree.nwk"),
-            "summary": os.path.join(d, "loci.summary.tsv"),
-            "outliers": os.path.join(d, "outliers.tsv"),
+            "profile": os.path.join(directory_path, "profile.tsv"),
+            "parquet_matrix": os.path.join(directory_path, "matrix.pq"),
+            "matrix": os.path.join(directory_path, "matrix.tsv"),
+            "clusters": os.path.join(directory_path, "clusters.tsv"),
+            "metadata": os.path.join(directory_path, "metadata.tsv"),
+            "tree": os.path.join(directory_path, "tree.nwk"),
+            "summary": os.path.join(directory_path, "loci.summary.tsv"),
+            "outliers": os.path.join(directory_path, "outliers.tsv"),
 
         }
 
@@ -156,12 +253,12 @@ def stage_data(groups,outdir,metadata_df,id_col,max_missing_frac=1):
                 os.remove(files[group_id][fname])
 
         df = remove_columns(groups[group_id], '0', max_missing_frac=max_missing_frac)
-        df.to_csv(files[group_id]['profile'], sep="\t", header=True, index=False)
+        df.to_csv(files[group_id][PROFILE_KEY], sep="\t", header=True, index=False)
         metadata_df[metadata_df[id_col].isin(list(groups[group_id][id_col]))].to_csv(files[group_id]['metadata'], sep="\t", header=True, index=False)
 
     return files
 
-def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method,num_cpus=1):
+def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, min_members, num_cpus=1):
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
@@ -174,7 +271,7 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method,n
 
     results = []
     for group_id in group_files:
-        results.append(pool.apply_async(process_group, (group_id,group_files[group_id],id_col,group_col,thresholds,outlier_thresh,method)))
+        results.append(pool.apply_async(process_group, (group_id,group_files[group_id],id_col,group_col,thresholds,outlier_thresh,method, min_members)))
 
     pool.close()
     pool.join()
@@ -189,7 +286,7 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method,n
     return r
 
 def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thresh,method,min_members=2):
-    (allele_map, df) = process_profile(output_files['profile'], column_mapping={})
+    (allele_map, df) = process_profile(output_files[PROFILE_KEY], column_mapping={})
     l, p = convert_profiles(df)
     min_dist = 0
     mean_dist = 0
@@ -197,7 +294,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
     max_dist = 0
     outliers = {}
     outlier_ids = []
-    metadata_summary = report(read_data(output_files['metadata']).df,[id_col,group_col]).get_data()
+    metadata_summary = report(read_data(output_files[METADATA_KEY]).df,[id_col,group_col]).get_data()
 
     if len(l) >= min_members:
         # compute distances
@@ -230,8 +327,8 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
             clust_df['address'] = values
             clust_df = clust_df.rename(columns={'id': id_col,'address':'gas_denovo_cluster_address'})
             clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)     
-            metadata_df = pd.read_csv(output_files['metadata'],sep="\t",header=0)
-            pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files['metadata'],sep="\t",header=True,index=False)
+            metadata_df = pd.read_csv(output_files[METADATA_KEY],sep="\t",header=0)
+            pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False)
             del(clust_df)
             del(metadata_df)
 
@@ -276,7 +373,7 @@ def format_df(column_map,df):
 def prepare_column_map(column_info,columns):
     column_map = {}
     for f in column_info:
-        column_map[f] = column_info[f]['label']
+        column_map[f] = column_info[f][LABEL_KEY]
         if column_map[f] == "":
             column_map[f] = f
 
@@ -297,10 +394,13 @@ def update_column_order(df,col_properties,restrict=False):
     df_cols = list(df.columns)
     num_rows = len(df)
     for col in col_properties:
-        cols[col] = col_properties[col]['label']
-        if col not in df_cols:
-            df[col] = [col_properties[col]['default']] * num_rows
-
+        if DISPLAY_KEY in col_properties[col] and col_properties[col][DISPLAY_KEY]:
+            if LABEL_KEY in col_properties[col]:
+                cols[col] = col_properties[col][LABEL_KEY]
+            else:
+                cols[col] = str(col)
+            if col not in df_cols:
+                df[col] = [col_properties[col]['default']] * num_rows
 
     order = list(cols.keys())
     if not restrict:
@@ -315,85 +415,132 @@ def update_column_order(df,col_properties,restrict=False):
 
     return df[list(cols.values())]
 
+def convert_to_bool(input):
+
+    if not isinstance(input, bool):
+            if str(input).lower() in TRUE_STRINGS:
+                result = True
+            elif str(input).lower() in FALSE_STRINGS:
+                result = False
+            else:
+                message = f'Expected a boolean-like string but found {input}'
+                raise Exception(message)
+    else:
+        result = input
+
+    return result
+
 def validate_params(config):
-    params = ['profile','metadata','outdir','id_col','partition_col','min_members']
+    params = [PROFILE_KEY, METADATA_KEY, OUTDIR_KEY, ID_COLUMN_KEY, PARTITION_COLUMN_KEY, MINIMUM_MEMBERS_KEY]
     missing = []
     for p in params:
         if p not in config or config[p] == '' or config[p] == None:
             missing.append(p)
     if len(missing) > 0:
-        print(f"Error, parameters not set for: {missing}")
-        sys.exit()
+        message = f"Error, parameters not set for: {missing}"
+        raise Exception(message)
 
-    
+    for key in config.keys():
+        # Check for any unexpected config keys:
+        if key not in PARAMETER_KEYS:
+            print(f'WARNING: "{key}" parameter unrecognized')
 
+        # Convert string booleans into actual booleans:
+        if key in BOOLEAN_KEYS:
+            config[key] = convert_to_bool(config[key])
+
+    # Convert string booleans into actual booleans:
+    if GROUPED_METADATA_COLUMNS_KEY in config:
+        summaries = config[GROUPED_METADATA_COLUMNS_KEY]
+        for summary in summaries:
+            if DISPLAY_KEY in summaries[summary]:
+                display = summaries[summary][DISPLAY_KEY]
+                summaries[summary][DISPLAY_KEY] = convert_to_bool(display)
+
+    # Convert string booleans into actual booleans:
+    if LINELIST_COLUMNS_KEY in config:
+        summaries = config[LINELIST_COLUMNS_KEY]
+        for summary in summaries:
+            if DISPLAY_KEY in summaries[summary]:
+                display = summaries[summary][DISPLAY_KEY]
+                summaries[summary][DISPLAY_KEY] = convert_to_bool(display)
 
 def cluster_reporter(config):
     validate_params(config)
-    profile_file = config['profile']
-    partition_file = config['metadata']
-    outdir = config['outdir']
-    outlier_thresh = config['outlier_thresh']
-    thresholds = config['thresholds']
-    method = config['method']
-    force = config['force']
-    id_col = config['id_col']
-    partition_col = config['partition_col']
-    min_members = config['min_members']
-    skip_qc = config['skip_qc']
-    num_threads = config['n_threads']
+    profile_file = config[PROFILE_KEY]
+    partition_file = config[METADATA_KEY]
+    outdir = config[OUTDIR_KEY]
+    outlier_thresh = config[OUTLIER_THRESHOLD_KEY]
+    thresholds = config[THRESHOLDS_KEY]
+    method = config[CLUSTER_METHOD_KEY]
+    force = config[FORCE_KEY]
+    id_col = config[ID_COLUMN_KEY]
+    partition_col = config[PARTITION_COLUMN_KEY]
+    min_members = config[MINIMUM_MEMBERS_KEY]
+    num_threads = config[THREADS_KEY]
+    restrict_output = config[ONLY_REPORT_LABELED_KEY]
 
-    missing_thresh = config['missing_thresh']
-    distm = config['distm']
-    count_missing = config['count_missing']
-    delimeter = config['delimeter']
+    # Unused parameters:
+    skip_qc = config[SKIP_QC_KEY]
+    missing_thresh = config[MISSING_THRESHOLD_KEY]
+    distm = config[DISTANCE_METHOD_KEY]
+    count_missing = config[COUNT_MISSING_KEY]
+    delimiter = config[DELIMITER_KEY]
+
+    # We're leaving the skip_qc for later, but want to warn.
+    # Since it's in argparse as a flag, it will always be false
+    # if not provided.
+    if(skip_qc):
+        print(f'WARNING: skip QC ({SKIP_QC_LONG}/{SKIP_QC_SHORT}) was provided, but this parameter is currently unused.')
+
+    if(missing_thresh):
+        print(f'WARNING: missing threshold ({MISSING_THRESHOLD_LONG}) was provided, but this parameter is currently unused.')
+
+    if(distm):
+        print(f'WARNING: distance method ({DISTANCE_METHOD_LONG}) was provided, but this parameter is currently unused.')
+
+    # See above comment for skip_qc.
+    if(count_missing):
+        print(f'WARNING: count missing ({COUNT_MISSING_LONG}/{COUNT_MISSING_SHORT}) was provided, but this parameter is currently unused.')
+
+    if(delimiter):
+        print(f'WARNING: delimiter ({DELIMITER_LONG}/{DELIMITER_SHORT}) was provided, but this parameter is currently unused.')
 
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
         sys_num_cpus = cpu_count()
 
-    if num_threads > sys_num_cpus:
+    if num_threads < 1:
+        message = f'{THREADS_KEY} ({num_threads}) needs to be at least 1.'
+        raise Exception(message)
+    elif num_threads > sys_num_cpus:
+        print(f'WARNING: {THREADS_KEY} ({num_threads}) exceeds the number of CPUs available ({sys_num_cpus}). Setting {THREADS_KEY} to {sys_num_cpus}.')
         num_threads = sys_num_cpus
 
     run_data = {}
     run_data['analysis_start_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     run_data['parameters'] = config
-    restrict_output = False
-    if "only_report_labeled_columns" in config:
-        restrict_output = config["only_report_labeled_columns"]
-        if not isinstance(restrict_output, bool):
-            if restrict_output.lower() in ['f', 'false']:
-                restrict_output = False
-            elif restrict_output.lower() in ['t', 'true']:
-                restrict_output = True
-            else:
-                print(f'only_report_labeled_columns needs to be true or false : you supplied {restrict_output}')
-                sys.exit()
-
 
     linelist_cols_properties = {}
     line_list_columns = []
-    if "linelist_columns" in config:
-        linelist_cols_properties = config["linelist_columns"]
+    if LINELIST_COLUMNS_KEY in config:
+        linelist_cols_properties = config[LINELIST_COLUMNS_KEY]
         for f in linelist_cols_properties:
-            if 'display' in linelist_cols_properties[f]:
-                v = linelist_cols_properties[f]['display'].lower()
-                if v in ['t','true']:
+            if DISPLAY_KEY in linelist_cols_properties[f]:
+                if linelist_cols_properties[f][DISPLAY_KEY]:
                     line_list_columns.append(f)
-
 
     cluster_summary_cols_properties = {}
     cluster_summary_header = []
     cluster_display_cols_to_remove = []
-    if "grouped_metadata_columns" in config:
-        cluster_summary_cols_properties = config["grouped_metadata_columns"]
+    if GROUPED_METADATA_COLUMNS_KEY in config:
+        cluster_summary_cols_properties = config[GROUPED_METADATA_COLUMNS_KEY]
         cluster_summary_header = list(cluster_summary_cols_properties.keys())
         for f in cluster_summary_cols_properties:
             cluster_summary_cols_properties[f]['data_type'] = cluster_summary_cols_properties[f]['data_type'].lower()
-            if 'display' in cluster_summary_cols_properties[f]:
-                v = cluster_summary_cols_properties[f]['display'].lower()
-                if v in ['f','false']:
+            if DISPLAY_KEY in cluster_summary_cols_properties[f]:
+                if not cluster_summary_cols_properties[f][DISPLAY_KEY]:
                     cluster_display_cols_to_remove.append(f)
     else:
         cluster_summary_cols_properties[partition_col] = { "data_type": "none","label":partition_col,"default":"","display":"True"}
@@ -410,53 +557,43 @@ def cluster_reporter(config):
         display_cluster_header = [partition_col]
 
     if not os.path.isfile(profile_file):
-        print(f'Profile path {profile_file} does not exist, please check path and try again')
-        sys.exit()
+        message = f'Profile path {profile_file} does not exist, please check path and try again'
+        raise Exception(message)
 
     if not os.path.isfile(partition_file):
-        print(f'Metadata file {partition_file} does not exist, please check path and try again')
-        sys.exit()
+        message = f'Metadata file {partition_file} does not exist, please check path and try again'
+        raise Exception(message)
 
     if not isinstance(outlier_thresh,int) or not isinstance(outlier_thresh,float):
         try:
             outlier_thresh = float(outlier_thresh)
         except:
-            print(f'Outlier threshold needs to be numeric: {outlier_thresh}')
-            sys.exit()
+            message = f'Outlier threshold needs to be numeric: {outlier_thresh}'
+            raise Exception(message)
 
     if not isinstance(thresholds,list):
         thresholds = thresholds.split(',')
 
-    try:
-        thresholds = [float(x) for x in thresholds]
-    except:
-        print(f'Thresholds needs to be numeric and delineated by comma {thresholds}')
-        sys.exit()
+    thresholds = process_thresholds(thresholds)
 
-    if not isinstance(force, bool):
-        if force.lower() in ['f','false']:
-            force = False
-        elif force.lower() in ['t','true']:
-            force = True
-        else:
-            print(f'Force needs to be true or false : you supplied {force}')
-            sys.exit()
-
-
-    if not method in ['average','complete','single']:
-        print(f'Linkage method supplied is invalid: {method}, it needs to be one of average, single, complete')
-        sys.exit()
+    if not method in CLUSTER_METHODS:
+        message = f'Linkage method supplied is invalid: {method}, it needs to be one of average, single, complete'
+        raise Exception(message)
 
     if not isinstance(min_members, int):
         try:
             min_members = int(min_members)
         except:
-            print(f'Min members needs to be an integer {min_members}')
-            sys.exit()
+            message = f'Min members needs to be an integer {min_members}'
+            raise Exception(message)
+
+    if min_members < 2:
+        message = f'{MINIMUM_MEMBERS_KEY} ({min_members}) needs to be at least 2.'
+        raise Exception(message)
 
     if not force and os.path.isdir(outdir):
-        print(f'folder {outdir} already exists, please choose new directory or use --force')
-        sys.exit()
+        message = f'folder {outdir} already exists, please choose new directory or use --force'
+        raise Exception(message)
 
     # initialize analysis directory
     if not os.path.isdir(outdir):
@@ -473,6 +610,10 @@ def cluster_reporter(config):
     metadata = read_data(partition_file)
     metadata_df = metadata.df
 
+    if len(metadata_df) == 0:
+        message = f'No metadata rows were provided.'
+        raise Exception(message)
+
     input_profile_samples = set(profile_df[id_col])
     input_metadata_samples = set(metadata_df[id_col])
 
@@ -487,7 +628,10 @@ def cluster_reporter(config):
     ovl_samples = list(ovl_samples)
 
     metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False)
-    groups = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col).subsets
+    split = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col)
+    groups = split.subsets
+    group_file_mapping = split.group_file_mapping
+
     filtered_samples = pd.concat(list(groups.values()), ignore_index=True)[id_col].to_list()
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(filtered_samples)], columns=[])
     ll_cols = list(set(linelist_df.columns.to_list()))
@@ -516,8 +660,8 @@ def cluster_reporter(config):
     with open(os.path.join(outdir,"threshold_map.json"),'w' ) as fh:
         fh.write(json.dumps(run_data['threshold_map'], indent=4))
 
-    group_files = stage_data(groups, outdir, metadata_df, id_col, max_missing_frac=1)
-    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, num_threads)
+    group_files = stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_missing_frac=1)
+    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, num_threads)
     group_metrics = {}
     for r in results:
         for k in r:
@@ -538,8 +682,8 @@ def cluster_reporter(config):
     display_columns = []
     for col in cluster_summary_cols_properties:
         prop = cluster_summary_cols_properties[col]
-        if 'display' in prop:
-            if prop['display'] in ['true','True',True]:
+        if DISPLAY_KEY in prop:
+            if prop[DISPLAY_KEY]:
                 display_columns.append(col)
         else:
             display_columns.append(col)
@@ -547,49 +691,54 @@ def cluster_reporter(config):
         if col in display_columns:
             continue
         display_columns.append(col)
-        
+
     summary_df = summary_df[display_columns]
     for k in cluster_display_cols_to_remove:
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
-
-
     
-    if "linelist_columns" in config:
+    if LINELIST_COLUMNS_KEY in config:
         line_list_columns = []
-        linelist_cols_properties = config["linelist_columns"]
+        linelist_cols_properties = config[LINELIST_COLUMNS_KEY]
         for f in linelist_cols_properties:
-            if 'display' in linelist_cols_properties[f]:
-                v = linelist_cols_properties[f]['display'].lower()
-                if v in ['t','true']:
+            if DISPLAY_KEY in linelist_cols_properties[f]:
+                if linelist_cols_properties[f][DISPLAY_KEY]:
                     line_list_columns.append(f)
 
     if not restrict_output and 'gas_denovo_cluster_address' not in line_list_columns:
         line_list_columns.append('gas_denovo_cluster_address')
-    
 
     metadata_dfs = []
-
     for group_id in group_files:
         #remove parquet file
         num_members = 0
         f = group_files[group_id]['parquet_matrix']
+
         if os.path.isfile(f):
             os.remove(f)
-        f = group_files[group_id][ "metadata"]
+        f = group_files[group_id]["metadata"]
+
         if os.path.isfile(f):
             obj = read_data(f)
+
             if obj.status:
                 num_members = len(obj.df)
                 metadata_dfs.append(obj.df)
-        if num_members < min_members:
-            shutil.rmtree(os.path.join(outdir,group_id))
 
-    
+        if num_members < min_members:
+            directory_name = group_file_mapping[group_id]
+            shutil.rmtree(os.path.join(outdir, directory_name))
+
     linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
-    linelist_df = linelist_df[line_list_columns]
-    linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
+
+    # Check that the expected columns exist:
+    # This is mainly to catch when clusters aren't created
+    # and no 'cluster_id' column exists.
+    if set(line_list_columns).issubset(linelist_df.columns):
+        linelist_df = linelist_df[line_list_columns]
+        linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
+        linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
 
     run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     sys.stdout.flush()
@@ -597,35 +746,56 @@ def cluster_reporter(config):
     with open(os.path.join(outdir, "run.json"), 'w') as fh:
         fh.write(json.dumps(run_data, indent=4))
 
+def process_thresholds(thresholds):
+
+    try:
+        processed = [float(x) for x in thresholds]
+    except ValueError:
+        message = f'thresholds {thresholds} must all be integers or floats'
+        raise Exception(message)
+
+    # Thresholds must be strictly decreasing:
+    if not all(processed[i] > processed[i+1] for i in range(len(processed)-1)):
+        message = f'thresholds {thresholds} must be in decreasing order'
+        raise Exception(message)
+
+    # Thresholds must be non-negative:
+    if not all(processed[i] >= 0 for i in range(len(processed))):
+        message = f'thresholds {thresholds} must be non-negative'
+        raise Exception(message)
+
+    return processed
 
 def main():
     cmd_args = parse_args()
     config_file = cmd_args.config
+
+    # Initialize based on argparse (command-line arguments):
     config = vars(cmd_args)
 
+    # Overwrite with config file parameters:
     if config_file is not None:
+
+        if not os.path.isfile(config_file):
+            message = f'Config path {config_file} does not exist, please check path and try again'
+            raise Exception(message)
+
         with open(config_file) as fh:
             c = json.loads(fh.read())
             for field in c:
                 config[field] = c[field]
-    
 
-    if not 'outlier_thresh' in config or config['outlier_thresh'] == '':
-        print(f'Error you must supply an outlier threshold as a cmd line parameter or in the config file')
-        sys.exit()
+    if not OUTLIER_THRESHOLD_KEY in config or config[OUTLIER_THRESHOLD_KEY] == '':
+        message = f'Error you must supply an outlier threshold as a cmd line parameter or in the config file'
+        raise Exception(message)
 
-    if not 'thresholds' in config or config['thresholds'] == '':
-        print(f'Error you ust supply a threshold as a cmd line parameter or in the config file')
-        sys.exit()
-
+    if not THRESHOLDS_KEY in config or config[THRESHOLDS_KEY] == '':
+        message = f'Error you must supply a threshold as a cmd line parameter or in the config file'
+        raise Exception(message)
 
     cluster_reporter(config)
-
-
 
 
 # call main function
 if __name__ == '__main__':
     main()
-
-

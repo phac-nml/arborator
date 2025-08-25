@@ -1,5 +1,5 @@
 {
-    "outlier_thresh": "25",
+    "outlier_thresh": "notanumber",
     "method": "average",
     "thresholds": "10,5,2,1,0",
     "min_members": 2,

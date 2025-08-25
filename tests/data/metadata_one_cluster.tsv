@@ -1,0 +1,6 @@
+sample_id	country	state/province	organism	score	host	cluster_id
+A	Canada	Ontario	Salmonella enterica	1	chicken	1
+B	Canada	British Columbia	Salmonella enterica	1	chicken	1
+K	Australia	NSW	Salmonella enterica	1	human	1
+L	Australia	NSW	Salmonella enterica	1	chicken	1
+M	Australia	NSW	Salmonella enterica	1	human	1

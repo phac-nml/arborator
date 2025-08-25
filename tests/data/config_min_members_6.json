@@ -2,7 +2,7 @@
     "outlier_thresh": "25",
     "method": "average",
     "thresholds": "10,5,2,1,0",
-    "min_members": 2,
+    "min_members": 6,
     "partition_col": "cluster_id",
     "id_col": "sample_id",
     "only_report_labeled_columns": "False",

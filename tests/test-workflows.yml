@@ -2,7 +2,113 @@
   command: arborator --help
 
 - name: Basic arborator test
+  tags:
+    - basic
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\tcount_country_Australia\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_NSW\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t3\t2\t0\t0\t3\t2\t5\t5\t0\t1\t0\t0\t3\t0\t1\tchicken,human\t2.0\t1.5\t2.0\t0.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t0\t1\t0\tchicken\t1.0\t1.0\t1.0\t1.0\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t0\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t0\t1\tchicken,human\t1.0\t1.0\t1.0\t1.0\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t0\t2\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t0\t2\t0\t0\t2\t2\t2\t0\t0\t0\t2\t0\t0\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Test Config File Overwrites Command Line Argument - thresholds
+  tags:
+    - config_overwrites_command_line
+    - config_overwrites_command_line_thresholds
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Test Command Line Argument Used When Parameter Not in Config - thresholds
+  tags:
+    - command_line_argument_used
+    - command_line_argument_used_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 10,9,8,7,6,5,4,3,2,1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -19,14 +125,429 @@
         - "M\t1|1.1.1.1.1.1.1.1.1.1"
     - path: "results/2/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1.1.1.1.1.1"
+        - "D\t2|1.1.1.1.1.1.1.1.1.1"
     - path: "results/3/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1.1.1.1.1.1"
+        - "F\t3|1.1.1.1.1.1.1.1.1.1"
     - path: "results/4/clusters.tsv"
       contains:
-        - "gas_denovo_cluster_address"
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1.1.1.1.1.1"
+        - "H\t4|1.1.1.1.1.1.1.1.1.1"
     - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1.1.1.1.1.1"
+        - "J\t5|1.1.1.1.1.1.1.1.1.1"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
+
+- name: Test Exception Handling - Increasing thresholds
+  tags:
+    - exception
+    - exception_increasing_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 1,2,3
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['1', '2', '3'] must be in decreasing order"
+
+- name: Test Exception Handling - Non-Decreasing thresholds
+  tags:
+    - exception
+    - exception_non_decreasing_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 1,1,1
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['1', '1', '1'] must be in decreasing order"
+
+- name: Test Exception Handling - Non-Numeric thresholds
+  tags:
+    - exception
+    - exception_non_numeric_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 1,a,b
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['1', 'a', 'b'] must all be integers or floats"
+
+- name: Test Exception Handling - Negative thresholds
+  tags:
+    - exception
+    - exception_negative_thresholds
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_thresholds.json --outdir results --thresholds 3,2,-1
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['3', '2', '-1'] must be non-negative"
+
+- name: Test File Handling - Missing profile
+  tags:
+    - file_handling
+    - file_handling_missing_profile
+  command: arborator --profile tests/data/profile_file_does_not_exist.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Profile path tests/data/profile_file_does_not_exist.tsv does not exist, please check path and try again"
+
+- name: Test File Handling - Missing metadata
+  tags:
+    - file_handling
+    - file_handling_missing_metadata
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_file_does_not_exist.tsv --config tests/data/config.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Metadata file tests/data/metadata_file_does_not_exist.tsv does not exist, please check path and try again"
+
+- name: Test File Handling - Missing config
+  tags:
+    - file_handling
+    - file_handling_missing_config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_file_does_not_exist.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Config path tests/data/config_file_does_not_exist.json does not exist, please check path and try again"
+
+- name: Test Specifying Parameters on Command-Line
+  tags:
+    - specify_parameters_on_command_line
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Test Config - Outlier Threshold Not a Number
+  tags:
+    - test_config
+    - test_config_outlier_threshold_NAN
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_outlier_threshold_NAN.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Outlier threshold needs to be numeric: notanumber"
+
+- name: Test Config - Invalid Method
+  tags:
+    - test_config
+    - test_config_invalid_method
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_invalid_method.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Linkage method supplied is invalid: invalid_method_DNE, it needs to be one of average, single, complete"
+
+- name: Test Config - Thresholds Not a Number
+  tags:
+    - test_config
+    - test_config_thresholds_NAN
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_thresholds_NAN.json --outdir results
+  exit_code: 1
+  stderr:
+    contains:
+      - "thresholds ['not', 'a', 'number'] must all be integers or floats"
+
+- name: Test Config - Min Members Not a Number
+  tags:
+    - test_config
+    - test_config_min_members_NAN
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_min_members_NAN.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Min members needs to be an integer notanumber"
+
+- name: Test Config - partition_col Does Not Exist
+  tags:
+    - test_config
+    - test_config_parition_does_not_exist
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_bad_partition.json --outdir results
+  exit_code: 1
+  stderr:
+    contains:
+      - "the partition column does_not_exist does not exist in the data"
+
+- name: Test Config - partition_col Not Specified
+  tags:
+    - test_config
+    - test_config_parition_not_specified
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_partition.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Error, parameters not set for: ['partition_col']"
+
+- name: Test Config - ID Column Missing
+  tags:
+    - test_config
+    - test_config_id_column_missing
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_id_column_missing.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Error, parameters not set for: ['id_col']"
+
+- name: Test Config - Only Report Labeled Columns Not Boolean
+  tags:
+    - test_config
+    - test_config_only_report_not_boolean
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_only_report_not_boolean.json --outdir results
+  exit_code: 1
+  stderr:
+    contains:
+      - "Expected a boolean-like string but found notboolean"
+    must_not_contain:
+      - "parameter unrecognized"
+
+- name: Test Config - Multiple Parameters Not Specified
+  tags:
+    - test_config
+    - test_config_multiple_parameters_not_specified
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_missing_multiple_parameters.json --outdir results
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "Error, parameters not set for: ['id_col', 'partition_col']"
+
+- name: Command-Line Parameter Warnings
+  tags:
+    - parameter_warnings
+    - parameter_warnings_command_line
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --skip_qc --missing_thresh 5 --distm scaled --count_missing --delimiter "."  --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id
+  exit_code: 0
+  stdout:
+    contains:
+      - "WARNING: skip QC (--skip_qc/-s) was provided, but this parameter is currently unused."
+      - "WARNING: missing threshold (--missing_thresh) was provided, but this parameter is currently unused."
+      - "WARNING: distance method (--distm) was provided, but this parameter is currently unused."
+      - "WARNING: count missing (--count_missing/-n) was provided, but this parameter is currently unused."
+      - "WARNING: delimiter (--delimiter/-d) was provided, but this parameter is currently unused."
+
+- name: Config Parameter Warnings
+  tags:
+    - parameter_warnings
+    - parameter_warnings_config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_specify_warning_parameters.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - "WARNING: skip QC (--skip_qc/-s) was provided, but this parameter is currently unused."
+      - "WARNING: missing threshold (--missing_thresh) was provided, but this parameter is currently unused."
+      - "WARNING: distance method (--distm) was provided, but this parameter is currently unused."
+      - "WARNING: count missing (--count_missing/-n) was provided, but this parameter is currently unused."
+      - "WARNING: delimiter (--delimiter/-d) was provided, but this parameter is currently unused."
+
+- name: No Grouped Meta Specification in Config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_grouped_metadata.json --outdir results
+  tags:
+    - config
+    - config_no_grouped_metadata_specification
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "cluster_id"
+        - "min_dist"
+        - "median_dist"
+      must_not_contain:
+        - "OutbreakID"
+        - "Country of collection"
+        - "Species"
+        - "Score"
+        - "State or Province"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: No Linelist Specification in Config
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_linelist.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  tags:
+    - config
+    - config_no_linelist_specification
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "organism"
+        - "cluster_id"
+        - "score"
+      must_not_contain:
+        - "Identifier"
+        - "OutbreakID"
+        - "Country of collection"
+        - "State or Province"
+        - "Species"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
       contains:
         - "gas_denovo_cluster_address"
     - path: "results/1/matrix.tsv"
@@ -41,5 +562,853 @@
       contains:
         - '"partition_col": "cluster_id"'
         - '"id_col": "sample_id"'
-        - '"clustering_method": "average"'
-        - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Unrecognized Config Parameters
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_unrecognized_parameters.json --outdir results
+  tags:
+  - config
+  - config_unrecognized_parameters
+  stdout:
+    contains:
+      - 'WARNING: "UNRECOGNIZED1" parameter unrecognized'
+      - 'WARNING: "UNKNOWN2" parameter unrecognized'
+
+- name: One Row in Metadata - min_members 2
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_one_row.tsv --config tests/data/config_min_members_2.json --outdir results
+  tags:
+  - metadata
+  - metadata_one_row_min_members_2
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      should_exist: false
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: No Rows in Metadata
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_no_rows.tsv --config tests/data/config_min_members_2.json --outdir results
+  tags:
+  - metadata
+  - metadata_no_rows
+  exit_code: 1
+  stderr:
+    contains:
+      - "No metadata rows were provided."
+
+- name: One Row in Metadata - min_members 1
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_one_row.tsv --config tests/data/config_min_members_1.json --outdir results
+  tags:
+  - metadata
+  - metadata_one_row_min_members_1
+  exit_code: 1
+  stderr:
+    contains:
+      - "min_members (1) needs to be at least 2."
+
+- name: min_members is 3
+  tags:
+    - min_members_3
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_min_members_3.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/run.json"
+      contains:
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: min_members is 6
+  tags:
+    - min_members_6
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_min_members_6.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/run.json"
+      contains:
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Specifying Parameters on Command-Line - Booleans
+  tags:
+    - specify_parameters_on_command_line
+    - specify_parameters_on_command_line_booleans
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id --count_missing --skip_qc --force --only_report_labeled
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/run.json"
+      contains:
+        - '"only_report_labeled_columns": true'
+        - '"count_missing": true'
+        - '"skip_qc": true'
+        - '"force": true'
+
+- name: Specifying Booleans in Config - True
+  tags:
+    - config
+    - config_booleans_true
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_booleans_true.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/run.json"
+      contains:
+        - '"only_report_labeled_columns": true'
+        - '"count_missing": true'
+        - '"skip_qc": true'
+        - '"force": true'
+
+- name: Specifying Booleans in Config - False
+  tags:
+    - config
+    - config_booleans_false
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_booleans_false.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/run.json"
+      contains:
+        - '"only_report_labeled_columns": false'
+        - '"count_missing": false'
+        - '"skip_qc": false'
+        - '"force": false'
+
+- name: num_threads is 0
+  tags:
+    - threads
+    - threads_0
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id --n_threads 0
+  exit_code: 1
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  stderr:
+    contains:
+      - "n_threads (0) needs to be at least 1."
+
+- name: Partition Column - Country
+  tags:
+    - parition_column
+    - parition_column_country
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col country --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "host"
+      must_not_contain:
+        - "count_country_Canada"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\tOutbreakID\tCountry of collection\tState or Province\tgas_denovo_cluster_address"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      should_exist: false
+    - path: "results/Australia/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "K\tAustralia|1.1.1.1.1"
+        - "L\tAustralia|1.1.1.1.2"
+        - "M\tAustralia|1.1.1.2.3"
+    - path: "results/Canada/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\tCanada|1.1.1.1.1"
+        - "B\tCanada|1.1.1.1.2"
+        - "E\tCanada|1.1.2.2.3"
+        - "F\tCanada|1.1.2.2.4"
+    - path: "results/United_Kingdom/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\tUnited Kingdom|1.1.1.1.1"
+        - "J\tUnited Kingdom|1.1.1.1.2"
+    - path: "results/United_States/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\tUnited States|1.1.1.1.1"
+        - "D\tUnited States|1.1.1.1.2"
+        - "G\tUnited States|1.1.2.2.3"
+        - "H\tUnited States|1.1.2.2.4"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "country"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Partition Column - state/province
+  tags:
+    - parition_column
+    - parition_column_state_province
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col "state/province" --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  exit_code: 0
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "host"
+      must_not_contain:
+        - "count_country_Ontario"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\tOutbreakID\tCountry of collection\tState or Province\tgas_denovo_cluster_address"
+    - path: "results/1/clusters.tsv"
+      should_exist: false
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      should_exist: false
+    - path: "results/British_Columbia/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "B\tBritish Columbia|1.1.1.1.1"
+        - "F\tBritish Columbia|1.1.2.2.2"
+    - path: "results/England/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\tEngland|1.1.1.1.1"
+        - "J\tEngland|1.1.1.1.2"
+    - path: "results/New_York/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\tNew York|1.1.2.2.3"
+        - "G\tNew York|1.1.1.1.1"
+        - "H\tNew York|1.1.1.1.2"
+    - path: "results/NSW/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "K\tNSW|1.1.1.1.1"
+        - "L\tNSW|1.1.1.1.2"
+        - "M\tNSW|1.1.1.2.3"
+    - path: "results/Ontario/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\tOntario|1.1.1.1.1"
+        - "E\tOntario|1.1.2.2.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "state/province"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: All Unique Loci
+  tags:
+    - all_unique_loci
+  command: arborator --profile tests/data/profile_unique_loci.tsv --metadata tests/data/metadata_unique_loci.tsv --config tests/data/config.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.2.2.2.2"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.2.2.2.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.2.2.2.2"
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB"
+        - "A\t0\t7"
+        - "B\t7\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Metadata Summary - None
+  tags:
+    - metadata
+    - metadata_summary_none
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_summarize_none.tsv --config tests/data/config_summarize_none.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\trandom"
+        - "1\t1,1.5,tomato,0.potato,1,000"
+        - "2\t2,fish"
+        - "3\t3,quote"
+        - "4\t4.0"
+        - "5\tcat,5.1"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\trandom\tgas_denovo_cluster_address"
+        - "A\t1\t1|1.1.1.1.1"
+        - "B\t1.5\t1|1.1.1.1.2"
+        - "K\ttomato\t1|1.1.1.2.3"
+        - "L\t0.potato\t1|1.1.1.2.4"
+        - "M\t1,000\t1|1.1.1.1.1"
+        - "C\t2\t2|1.1.1.1.1"
+        - "D\tfish\t2|1.1.1.1.2"
+        - "E\t3\t3|1.1.1.1.1"
+        - "F\tquote\t3|1.1.1.1.2"
+        - "G\t4.0\t4|1.1.1.1.1"
+        - "H\t4.0\t4|1.1.1.1.2"
+        - "I\tcat\t5|1.1.1.1.1"
+        - "J\t5.1\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Metadata Summary - Categorical
+  tags:
+    - metadata
+    - metadata_summary_categorical
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_summarize_categorical.tsv --config tests/data/config_summarize_categorical.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\trandom\tcount_members\tcount_outliers\tcount_random_cat\tcount_random_dog\tcount_random_fish\tcount_random_mouse\tcount_random_potato\tcount_random_tomato\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids"
+        - "1\tcat,dog,potato,tomato\t5\t0\t1\t2\t0\t0\t1\t1\t2.0\t1.5\t2.0\t0.0"
+        - "2\tcat,fish\t2\t0\t1\t0\t1\t0\t0\t0\t1.0\t1.0\t1.0\t1.0"
+        - "3\tdog,mouse\t2\t0\t0\t1\t0\t1\t0\t0\t1.0\t1.0\t1.0\t1.0"
+        - "4\tcat,mouse\t2\t0\t1\t0\t0\t1\t0\t0\t1.0\t1.0\t1.0\t1.0"
+        - "5\tcat\t2\t0\t2\t0\t0\t0\t0\t0\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\trandom\tgas_denovo_cluster_address"
+        - "A\tcat\t1|1.1.1.1.1"
+        - "B\tdog\t1|1.1.1.1.2"
+        - "K\ttomato\t1|1.1.1.2.3"
+        - "L\tpotato\t1|1.1.1.2.4"
+        - "M\tdog\t1|1.1.1.1.1"
+        - "C\tcat\t2|1.1.1.1.1"
+        - "D\tfish\t2|1.1.1.1.2"
+        - "E\tdog\t3|1.1.1.1.1"
+        - "F\tmouse\t3|1.1.1.1.2"
+        - "G\tmouse\t4|1.1.1.1.1"
+        - "H\tcat\t4|1.1.1.1.2"
+        - "I\tcat\t5|1.1.1.1.1"
+        - "J\tcat\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Metadata Summary - Min Max
+  tags:
+    - metadata
+    - metadata_summary_min_max
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_summarize_min_max.tsv --config tests/data/config_summarize_min_max.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\trandom"
+        - "1\t1,11,12,13,2"
+        - "13.0\t1.0"
+        - "2\t3,4"
+        - "4.0\t3.0"
+        - "3\t5,6"
+        - "6.0\t5.0"
+        - "4\t7,8"
+        - "8.0\t7.0"
+        - "5\t10,9"
+        - "10.0\t9.0"
+        - "random_max_value"
+        - "random_min_value"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\trandom\tgas_denovo_cluster_address"
+        - "A\t1\t1|1.1.1.1.1"
+        - "B\t2\t1|1.1.1.1.2"
+        - "K\t11\t1|1.1.1.2.3"
+        - "L\t12\t1|1.1.1.2.4"
+        - "M\t13\t1|1.1.1.1.1"
+        - "C\t3\t2|1.1.1.1.1"
+        - "D\t4\t2|1.1.1.1.2"
+        - "E\t5\t3|1.1.1.1.1"
+        - "F\t6\t3|1.1.1.1.2"
+        - "G\t7\t4|1.1.1.1.1"
+        - "H\t8\t4|1.1.1.1.2"
+        - "I\t9\t5|1.1.1.1.1"
+        - "J\t10\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Metadata Summary - Descriptive
+  tags:
+    - metadata
+    - metadata_summary_descriptive
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_summarize_descriptive.tsv --config tests/data/config_summarize_descriptive.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\trandom"
+        - "1\t1,11,12,13,2"
+        - "13.0\t11.0\t7.8\t1.0"
+        - "2\t3,4"
+        - "4.0\t3.5\t3.5\t3.0"
+        - "3\t5,6"
+        - "6.0\t5.5\t5.5\t5.0"
+        - "4\t7,8"
+        - "8.0\t7.5\t7.5\t7.0"
+        - "5\t10,9"
+        - "10.0\t9.5\t9.5\t9.0"
+        - "random_max_value"
+        - "random_mean_value"
+        - "random_median_value"
+        - "random_min_value"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Identifier\trandom\tgas_denovo_cluster_address"
+        - "A\t1\t1|1.1.1.1.1"
+        - "B\t2\t1|1.1.1.1.2"
+        - "K\t11\t1|1.1.1.2.3"
+        - "L\t12\t1|1.1.1.2.4"
+        - "M\t13\t1|1.1.1.1.1"
+        - "C\t3\t2|1.1.1.1.1"
+        - "D\t4\t2|1.1.1.1.2"
+        - "E\t5\t3|1.1.1.1.1"
+        - "F\t6\t3|1.1.1.1.2"
+        - "G\t7\t4|1.1.1.1.1"
+        - "H\t8\t4|1.1.1.1.2"
+        - "I\t9\t5|1.1.1.1.1"
+        - "J\t10\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: One Cluster
+  tags:
+    - one_cluster
+  command: arborator --profile tests/data/profile_one_cluster.tsv --metadata tests/data/metadata_one_cluster.tsv --config tests/data/config.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      should_exist: false
+    - path: "results/3/clusters.tsv"
+      should_exist: false
+    - path: "results/4/clusters.tsv"
+      should_exist: false
+    - path: "results/5/clusters.tsv"
+      should_exist: false
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Duplicated Data
+  tags:
+    - duplicated_data
+  command: arborator --profile tests/data/profile_duplicated.tsv --metadata tests/data/metadata_duplicated.tsv --config tests/data/config.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID"
+        - "count_country_Canada"
+        - "host"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.2"
+        - "B\t1|1.1.1.1.1"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.2"
+        - "N\t1|1.1.1.1.2"
+        - "O\t1|1.1.1.1.1"
+        - "X\t1|1.1.1.2.3"
+        - "Y\t1|1.1.1.2.4"
+        - "Z\t1|1.1.1.1.2"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+        - "P\t2|1.1.1.1.1"
+        - "Q\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+        - "R\t3|1.1.1.1.1"
+        - "S\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+        - "T\t4|1.1.1.1.1"
+        - "U\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+        - "V\t5|1.1.1.1.1"
+        - "W\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM\tN\tO\tX\tY\tZ"
+        - "A\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+        - "N\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+        - "O\t1\t0\t2\t2\t1\t1\t0\t2\t2\t1"
+        - "X\t2\t2\t0\t1\t2\t2\t2\t0\t1\t2"
+        - "Y\t2\t2\t1\t0\t2\t2\t2\t1\t0\t2"
+        - "Z\t0\t1\t2\t2\t0\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Removing Special Characters From File Paths
+  tags:
+    - special_characters
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata_replace_special.tsv --config tests/data/config_replace_special.json --outdir results --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col replace --id_col sample_id
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "replace\tcount_members\tcount_outliers\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids"
+        - "abAByzZy\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "A-Z-Y\t1\t0\t0\t0\t0\t0"
+        - "A-Z.Y\t1\t0\t0\t0\t0\t0"
+        - "0_9.1-8\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "&89AZ@[]\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "collision-)()!@#$%\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "collision-*()!@#$%\t2\t0\t1.0\t1.0\t1.0\t1.0"
+        - "cluster size 1 will be removed\t1\t0\t0\t0\t0\t0"
+    - path: "results/_89AZ___/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t&89AZ@[]|1.1.1.1.1"
+        - "H\t&89AZ@[]|1.1.1.1.2"
+    - path: "results/0_9.1-8/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t0_9.1-8|1.1.1.1.1"
+        - "F\t0_9.1-8|1.1.1.1.2"
+    - path: "results/abAByzZy/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\tabAByzZy|1.1.1.1.1"
+        - "B\tabAByzZy|1.1.1.1.2"
+    - path: "results/collision-________/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\tcollision-)()!@#$%|1.1.1.1.1"
+        - "J\tcollision-)()!@#$%|1.1.1.1.2"
+    - path: "results/collision-________-1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "K\tcollision-*()!@#$%|1.1.1.1.1"
+        - "L\tcollision-*()!@#$%|1.1.1.1.2"
+    - path: "results/_89AZ___/matrix.tsv"
+      contains:
+        - "dists\tG\tH"
+        - "G\t0\t1"
+        - "H\t1\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "replace"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
