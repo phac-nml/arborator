@@ -583,6 +583,8 @@
   stdout:
     must_not_contain:
       - "parameter unrecognized"
+    contains:
+      - 'WARNING: Failed to generate any clusters! No "metadata.included.tsv" will be generated.'
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -663,6 +665,8 @@
   stdout:
     must_not_contain:
       - "parameter unrecognized"
+    contains:
+      - 'WARNING: Failed to generate any clusters! No "metadata.included.tsv" will be generated.'
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -1412,3 +1416,14 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Warnings for Extra Line List Items
+  tags:
+    - config_warnings
+    - config_warnings_extra_line_list
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_extra_linelist.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - 'WARNING: "does_not_exist" specified in the line list, but does not exist in the metadata.'
+      - 'WARNING: "extra" specified in the line list, but does not exist in the metadata.'
