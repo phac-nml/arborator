@@ -934,7 +934,7 @@
         - "1\t1,1.5,tomato,0.potato,1,000"
         - "2\t2,fish"
         - "3\t3,quote"
-        - "4\t4.0"
+        - "4\t4,4.0"
         - "5\tcat,5.1"
     - path: "results/1/clusters.tsv"
       contains:
@@ -1409,6 +1409,123 @@
     - path: "results/run.json"
       contains:
         - '"partition_col": "replace"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Sample IDs All Integers
+  tags:
+    - ids_all_integers
+  command: arborator --profile tests/data/profile_integer_ids.tsv --metadata tests/data/metadata_integer_ids.tsv --config tests/data/config_integer_ids.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t2\t0\t0\t2\t0\t2\t2\t0\t1\t0\t0\t0\t1\tchicken\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t1\t0\tchicken\t1.0\t1.0\t1.0\t1.0\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t1\tchicken,human\t1.0\t1.0\t1.0\t1.0\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t2\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t3\t0\t0\t3\t3\t3\t0\t0\t0\t3\t0\t0\thuman\t4.0\t3.0\t4.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "0\t1|1.1.1.1.1"
+        - "1\t1|1.1.1.1.2"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "2\t2|1.1.1.1.1"
+        - "3\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "4\t3|1.1.1.1.1"
+        - "5\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "6\t4|1.1.1.1.1"
+        - "7\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "8\t5|1.1.1.1.1"
+        - "9\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\t0\t1"
+        - "0\t0"
+        - "1\t1"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "8\t5|1.1.1.1.1"
+        - "9\t5|1.1.1.1.2"
+        - "10\t5|1.1.2.2.3"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+
+- name: Sample IDs All Integers, One Missing
+  tags:
+    - ids_all_integers_missing_one
+  command: arborator --profile tests/data/profile_integer_ids.tsv --metadata tests/data/metadata_integer_ids_missing_one.tsv --config tests/data/config_integer_ids.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t2\t0\t0\t2\t0\t2\t2\t0\t1\t0\t0\t0\t1\tchicken\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t1\t0\tchicken\t1.0\t1.0\t1.0\t1.0\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t1\tchicken,human\t1.0\t1.0\t1.0\t1.0\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t2\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t2\t0\t0\t2\t2\t2\t0\t0\t0\t2\t0\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "0\t1|1.1.1.1.1"
+        - "1\t1|1.1.1.1.2"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "2\t2|1.1.1.1.1"
+        - "3\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "4\t3|1.1.1.1.1"
+        - "5\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "6\t4|1.1.1.1.1"
+        - "7\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "8\t5|1.1.1.1.1"
+        - "9\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\t0\t1"
+        - "0\t0"
+        - "1\t1"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "8\t5|1.1.1.1.1"
+        - "9\t5|1.1.1.1.2"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
