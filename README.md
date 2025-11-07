@@ -77,7 +77,7 @@ The following tools and dependencies should be installed by the conda environmen
 - scipy
 - profile_dists
 - genomic_address_service
-- open_pyxl
+- openpyxl
 
 # Getting Started
 
