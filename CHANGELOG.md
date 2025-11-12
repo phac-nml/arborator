@@ -5,7 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.1] - Unreleased
 
+### Added
+
+- Additional XLSX-formatted output files for the cluster_summary.tsv and metadata.included.tsv files. [PR 27](https://github.com/phac-nml/arborator/pull/27)
+
 ### Changed
+
 - Introduced better handling and warning messages for extra line list items. [PR #24](https://github.com/phac-nml/arborator/pull/24)
 
 ## [1.1.0] - 2025-07-28

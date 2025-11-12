@@ -97,7 +97,13 @@ DISPLAY_KEY = "display"
 LABEL_KEY = "label"
 GAS_CLUSTER_ADDRESS_KEY = "gas_denovo_cluster_address"
 
-METADATA_INCLUDED_FILEPATH = "metadata.included.tsv"
+METADATA_INCLUDED_FILEPATH_TSV = "metadata.included.tsv"
+METADATA_INCLUDED_FILEPATH_EXCEL = "metadata.included.xlsx"
+METADATA_INCLUDED_SHEET_NAME = "Included Metadata"
+
+CLUSTER_SUMMARY_FILEPATH_TSV = "cluster_summary.tsv"
+CLUSTER_SUMMARY_FILEPATH_EXCEL = "cluster_summary.xlsx"
+CLUSTER_SUMMARY_SHEET_NAME = "Cluster Summary"
 
 PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
                   PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
@@ -672,7 +678,7 @@ def cluster_reporter(config):
 
     #merge metadata files
 
-    summary_file = os.path.join(outdir, "cluster_summary.tsv")
+    summary_file = os.path.join(outdir, CLUSTER_SUMMARY_FILEPATH_TSV)
 
 
     summary_data = compile_group_data(group_metrics=group_metrics, field_data_types=cluster_summary_cols_properties,
@@ -700,6 +706,7 @@ def cluster_reporter(config):
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
+    summary_df.to_excel(os.path.join(outdir, CLUSTER_SUMMARY_FILEPATH_EXCEL), header=True, index=False, sheet_name=CLUSTER_SUMMARY_SHEET_NAME)
     
     if LINELIST_COLUMNS_KEY in config:
         line_list_columns = []
@@ -754,10 +761,12 @@ def cluster_reporter(config):
 
         linelist_df = linelist_df[list(intersection)]
         linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
-        linelist_df.to_csv(os.path.join(outdir, METADATA_INCLUDED_FILEPATH),sep="\t",header=True,index=False)
+
+        linelist_df.to_csv(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_TSV), sep="\t", header=True, index=False)
+        linelist_df.to_excel(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_EXCEL), header=True, index=False, sheet_name=METADATA_INCLUDED_SHEET_NAME)
 
     else:
-        print(f'WARNING: Failed to generate any clusters! No "{METADATA_INCLUDED_FILEPATH}" will be generated.')
+        print(f'WARNING: Failed to generate any clusters! No "{METADATA_INCLUDED_FILEPATH_TSV}" will be generated.')
 
     run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     sys.stdout.flush()

@@ -60,8 +60,8 @@ setup(
         'psutil',
         'scipy',
         'profile_dists',
-        'genomic_address_service'
-
+        'genomic_address_service',
+        'openpyxl'
     ],
 
     entry_points={
