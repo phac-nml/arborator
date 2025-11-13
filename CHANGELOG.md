@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - Unreleased
+## [1.2.0] - Unreleased
 
 ### Added
 
@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Introduced better handling and warning messages for extra line list items. [PR #24](https://github.com/phac-nml/arborator/pull/24)
+
+### Fixed
+
+- Introduced fixes alongside a new version of profile_dists that fixes problems with non-string sample IDs (ex: 1, 2, 3.0). [PR 28](https://github.com/phac-nml/arborator/pull/28/)
 
 ## [1.1.0] - 2025-07-28
 
