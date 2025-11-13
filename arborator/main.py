@@ -328,15 +328,12 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         write_outliers(pairwise_outlier, output_files['outliers'])
 
         if os.path.isfile(output_files['clusters']) and os.path.isfile(output_files["metadata"]):
-            clust_df = pd.read_csv(output_files['clusters'],sep="\t",header=0)
+            clust_df = pd.read_csv(output_files['clusters'], sep="\t", header=0, dtype=str)
             clust_df = clust_df[['id','address']]
-            values = clust_df['address']
-            for idx,value in enumerate(values):
-                values[idx] = f'{group_id}|{value}'
-            clust_df['address'] = values
+            clust_df['address'] = str(group_id) + "|" + clust_df['address'].astype(str) # appends "{group_id}|" to the address
             clust_df = clust_df.rename(columns={'id': id_col,'address':GAS_CLUSTER_ADDRESS_KEY})
-            clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)     
-            metadata_df = pd.read_csv(output_files[METADATA_KEY],sep="\t",header=0)
+            clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)
+            metadata_df = pd.read_csv(output_files[METADATA_KEY], sep="\t", header=0, dtype=str)
             pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False)
             del(clust_df)
             del(metadata_df)
@@ -351,7 +348,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         'outlier_ids':",".join([str(x) for x in outlier_ids]),
         'metadata':metadata_summary
     }
-    }
+}
 
 def compile_group_data(group_metrics, field_data_types,id_col,field_name_key,field_name_value,header=[]):
     s = summarizer(header,group_metrics,field_data_types,field_name_key,field_name_value)
