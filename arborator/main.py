@@ -95,6 +95,15 @@ GROUPED_METADATA_COLUMNS_KEY = "grouped_metadata_columns"
 LINELIST_COLUMNS_KEY = "linelist_columns"
 DISPLAY_KEY = "display"
 LABEL_KEY = "label"
+GAS_CLUSTER_ADDRESS_KEY = "gas_denovo_cluster_address"
+
+METADATA_INCLUDED_FILEPATH_TSV = "metadata.included.tsv"
+METADATA_INCLUDED_FILEPATH_EXCEL = "metadata.included.xlsx"
+METADATA_INCLUDED_SHEET_NAME = "Included Metadata"
+
+CLUSTER_SUMMARY_FILEPATH_TSV = "cluster_summary.tsv"
+CLUSTER_SUMMARY_FILEPATH_EXCEL = "cluster_summary.xlsx"
+CLUSTER_SUMMARY_SHEET_NAME = "Cluster Summary"
 
 PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
                   PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
@@ -322,7 +331,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
             clust_df = pd.read_csv(output_files['clusters'], sep="\t", header=0, dtype=str)
             clust_df = clust_df[['id','address']]
             clust_df['address'] = str(group_id) + "|" + clust_df['address'].astype(str) # appends "{group_id}|" to the address
-            clust_df = clust_df.rename(columns={'id': id_col,'address':'gas_denovo_cluster_address'})
+            clust_df = clust_df.rename(columns={'id': id_col,'address':GAS_CLUSTER_ADDRESS_KEY})
             clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)
             metadata_df = pd.read_csv(output_files[METADATA_KEY], sep="\t", header=0, dtype=str)
             pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False)
@@ -666,7 +675,7 @@ def cluster_reporter(config):
 
     #merge metadata files
 
-    summary_file = os.path.join(outdir, "cluster_summary.tsv")
+    summary_file = os.path.join(outdir, CLUSTER_SUMMARY_FILEPATH_TSV)
 
 
     summary_data = compile_group_data(group_metrics=group_metrics, field_data_types=cluster_summary_cols_properties,
@@ -694,6 +703,7 @@ def cluster_reporter(config):
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
+    summary_df.to_excel(os.path.join(outdir, CLUSTER_SUMMARY_FILEPATH_EXCEL), header=True, index=False, sheet_name=CLUSTER_SUMMARY_SHEET_NAME)
     
     if LINELIST_COLUMNS_KEY in config:
         line_list_columns = []
@@ -703,8 +713,8 @@ def cluster_reporter(config):
                 if linelist_cols_properties[f][DISPLAY_KEY]:
                     line_list_columns.append(f)
 
-    if not restrict_output and 'gas_denovo_cluster_address' not in line_list_columns:
-        line_list_columns.append('gas_denovo_cluster_address')
+    if not restrict_output and GAS_CLUSTER_ADDRESS_KEY not in line_list_columns:
+        line_list_columns.append(GAS_CLUSTER_ADDRESS_KEY)
 
     metadata_dfs = []
     for group_id in group_files:
@@ -729,13 +739,31 @@ def cluster_reporter(config):
 
     linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
 
-    # Check that the expected columns exist:
-    # This is mainly to catch when clusters aren't created
-    # and no 'cluster_id' column exists.
-    if set(line_list_columns).issubset(linelist_df.columns):
-        linelist_df = linelist_df[line_list_columns]
+    # Only try to load metadata columns that actually exists:
+    intersection = set(line_list_columns).intersection(set(linelist_df.columns))
+
+    # Ensure clustering was successful and therefore the GAS_CLUSTER_ADDRESS_KEY
+    # column exists in both the line list and dataframe:
+    if GAS_CLUSTER_ADDRESS_KEY in intersection:
+
+        # Warn about metadata columns specified in the line list that don't exist
+        # in the metadata. This warning is inside the conditional, otherwise
+        # it will report that GAS_CLUSTER_ADDRESS_KEY was specified in the
+        # line list, but doesn't exist, which isn't true. It's how arborator handles
+        # this data.
+        difference = set(line_list_columns).difference(set(linelist_df.columns))
+
+        for item in difference:
+            print(f'WARNING: "{item}" specified in the line list, but does not exist in the metadata.')
+
+        linelist_df = linelist_df[list(intersection)]
         linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
-        linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
+
+        linelist_df.to_csv(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_TSV), sep="\t", header=True, index=False)
+        linelist_df.to_excel(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_EXCEL), header=True, index=False, sheet_name=METADATA_INCLUDED_SHEET_NAME)
+
+    else:
+        print(f'WARNING: Failed to generate any clusters! No "{METADATA_INCLUDED_FILEPATH_TSV}" will be generated.')
 
     run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     sys.stdout.flush()

@@ -59,6 +59,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Test Config File Overwrites Command Line Argument - thresholds
   tags:
@@ -100,6 +102,8 @@
     - path: "results/run.json"
       contains:
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Test Command Line Argument Used When Parameter Not in Config - thresholds
   tags:
@@ -157,6 +161,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,9,8,7,6,5,4,3,2,1"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Test Exception Handling - Increasing thresholds
   tags:
@@ -293,6 +299,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Test Config - Outlier Threshold Not a Number
   tags:
@@ -494,6 +502,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: No Linelist Specification in Config
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_linelist.json --outdir results
@@ -564,6 +574,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Unrecognized Config Parameters
   command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_unrecognized_parameters.json --outdir results
@@ -583,6 +595,8 @@
   stdout:
     must_not_contain:
       - "parameter unrecognized"
+    contains:
+      - 'WARNING: Failed to generate any clusters! No "metadata.included.tsv" will be generated.'
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -663,6 +677,8 @@
   stdout:
     must_not_contain:
       - "parameter unrecognized"
+    contains:
+      - 'WARNING: Failed to generate any clusters! No "metadata.included.tsv" will be generated.'
   files:
     - path: "results/cluster_summary.tsv"
       contains:
@@ -809,6 +825,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Partition Column - state/province
   tags:
@@ -874,6 +892,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: All Unique Loci
   tags:
@@ -918,6 +938,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Metadata Summary - None
   tags:
@@ -994,6 +1016,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Metadata Summary - Categorical
   tags:
@@ -1070,6 +1094,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Metadata Summary - Min Max
   tags:
@@ -1153,6 +1179,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Metadata Summary - Descriptive
   tags:
@@ -1238,6 +1266,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: One Cluster
   tags:
@@ -1282,6 +1312,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Duplicated Data
   tags:
@@ -1356,6 +1388,8 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
 
 - name: Removing Special Characters From File Paths
   tags:
@@ -1823,3 +1857,14 @@
         - '"id_col": "sample_id"'
         - '"method": "average"'
         - '"thresholds": "10,5,2,1,0"'
+
+- name: Warnings for Extra Line List Items
+  tags:
+    - config_warnings
+    - config_warnings_extra_line_list
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_extra_linelist.json --outdir results
+  exit_code: 0
+  stdout:
+    contains:
+      - 'WARNING: "does_not_exist" specified in the line list, but does not exist in the metadata.'
+      - 'WARNING: "extra" specified in the line list, but does not exist in the metadata.'
