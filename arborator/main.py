@@ -180,7 +180,7 @@ def parse_args():
     parser.add_argument(CLUSTER_METHOD_LONG, CLUSTER_METHOD_SHORT, type=str, required=False, help='cluster method [single, complete, average]',
                         default='average')
     parser.add_argument(TREE_DISTANCES_LONG, type=str, required=False, default='patristic', choices=multi_level_clustering.VALID_TREE_DISTANCES,
-                        help=('Defines how distances in the input matrix are represented in the output tree (Newick file). '
+                        help=('Defines how distances in distance matrices are interpretted by GAS and represented in the output tree (Newick file). '
                              'Use "patristic" to interpret distances in the matrix as sum of branch lengths between clusters or leaves, '
                              'and "cophenetic" to interpret distances in the matrix as the minimum distance two clusters or leaves need '
                              'to be in order to be grouped into the same cluster.'))
