@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Additional XLSX-formatted output files for the cluster_summary.tsv and metadata.included.tsv files. [PR 27](https://github.com/phac-nml/arborator/pull/27)
+- A `tree_distances` parameter which instructs GAS to interpret distance matrices distances as either `cophenetic` (the distance at which two clusters or leaves cluster together) or `patristic` (the sum of branch lengths between clusters or leaves) [PR 29](https://github.com/phac-nml/arborator/pull/29)
 
 ### Changed
 
