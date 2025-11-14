@@ -13,7 +13,7 @@ from arborator.classes.read_data import read_data
 from arborator.classes.report import report
 from arborator.classes.split_profiles import split_profiles
 from genomic_address_service.classes.multi_level_clustering import multi_level_clustering
-from genomic_address_service.utils import format_threshold_map, write_threshold_map
+from genomic_address_service.utils import format_threshold_map
 from genomic_address_service.mcluster import write_clusters
 from genomic_address_service.constants import CLUSTER_METHODS
 import fastparquet as pq
@@ -77,6 +77,9 @@ CLUSTER_METHOD_KEY = "method"
 CLUSTER_METHOD_LONG = "--" + CLUSTER_METHOD_KEY
 CLUSTER_METHOD_SHORT = "-e"
 
+TREE_DISTANCES_KEY = "tree_distances"
+TREE_DISTANCES_LONG = "--" + TREE_DISTANCES_KEY
+
 FORCE_KEY = "force"
 FORCE_LONG = "--" + FORCE_KEY
 FORCE_SHORT = "-f"
@@ -109,8 +112,8 @@ PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
                   PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
                   MINIMUM_MEMBERS_KEY, COUNT_MISSING_KEY, MISSING_THRESHOLD_KEY,
                   DISTANCE_METHOD_KEY, SKIP_QC_KEY, THRESHOLDS_KEY,
-                  DELIMITER_KEY, CLUSTER_METHOD_KEY, FORCE_KEY, THREADS_KEY,
-                  VERSION_KEY, ONLY_REPORT_LABELED_KEY,
+                  DELIMITER_KEY, CLUSTER_METHOD_KEY, TREE_DISTANCES_KEY,
+                  FORCE_KEY, THREADS_KEY, VERSION_KEY, ONLY_REPORT_LABELED_KEY,
                   GROUPED_METADATA_COLUMNS_KEY, LINELIST_COLUMNS_KEY]
 
 BOOLEAN_KEYS = [COUNT_MISSING_KEY, SKIP_QC_KEY, FORCE_KEY, ONLY_REPORT_LABELED_KEY]
@@ -176,6 +179,11 @@ def parse_args():
     parser.add_argument(DELIMITER_LONG, DELIMITER_SHORT, type=str, required=False, help='UNUSED: delimiter desired for nomenclature code')
     parser.add_argument(CLUSTER_METHOD_LONG, CLUSTER_METHOD_SHORT, type=str, required=False, help='cluster method [single, complete, average]',
                         default='average')
+    parser.add_argument(TREE_DISTANCES_LONG, type=str, required=False, default='patristic', choices=multi_level_clustering.VALID_TREE_DISTANCES,
+                        help=('Defines how distances in the input matrix are represented in the output tree (Newick file). '
+                             'Use "patristic" to interpret distances in the matrix as sum of branch lengths between clusters or leaves, '
+                             'and "cophenetic" to interpret distances in the matrix as the minimum distance two clusters or leaves need '
+                             'to be in order to be grouped into the same cluster.'))
 
     parser.add_argument(FORCE_LONG, FORCE_SHORT, required=False, help='Overwrite existing directory',
                         action='store_true')
@@ -267,7 +275,8 @@ def stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_miss
 
     return files
 
-def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, min_members, num_cpus=1):
+def process_data(group_files, id_col, group_col, thresholds, outlier_thresh, method, min_members,
+                 tree_distance_representation, num_cpus=1):
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
@@ -280,7 +289,8 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, 
 
     results = []
     for group_id in group_files:
-        results.append(pool.apply_async(process_group, (group_id,group_files[group_id],id_col,group_col,thresholds,outlier_thresh,method, min_members)))
+        results.append(pool.apply_async(process_group, (group_id, group_files[group_id], id_col, group_col, thresholds,
+                                                        outlier_thresh, method, tree_distance_representation, min_members)))
 
     pool.close()
     pool.join()
@@ -294,7 +304,8 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, 
 
     return r
 
-def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thresh,method,min_members=2):
+def process_group(group_id, output_files, id_col, group_col, thresholds,
+                  outlier_thresh, method, tree_distance_representation, min_members=2):
     (allele_map, df) = process_profile(output_files[PROFILE_KEY], column_mapping={})
     l, p = convert_profiles(df)
     min_dist = 0
@@ -312,7 +323,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
                                                                           sep="\t")
 
         # perform clustering
-        mc = multi_level_clustering(output_files['matrix'], thresholds, method)
+        mc = multi_level_clustering(output_files['matrix'], thresholds, method, tree_distances=tree_distance_representation)
         memberships = mc.get_memberships()
         with open(output_files['tree'], 'w') as fh:
             fh.write(f"{mc.newick}\n")
@@ -479,6 +490,7 @@ def cluster_reporter(config):
     outlier_thresh = config[OUTLIER_THRESHOLD_KEY]
     thresholds = config[THRESHOLDS_KEY]
     method = config[CLUSTER_METHOD_KEY]
+    tree_distance_representation = config[TREE_DISTANCES_KEY]
     force = config[FORCE_KEY]
     id_col = config[ID_COLUMN_KEY]
     partition_col = config[PARTITION_COLUMN_KEY]
@@ -667,7 +679,7 @@ def cluster_reporter(config):
         fh.write(json.dumps(run_data['threshold_map'], indent=4))
 
     group_files = stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_missing_frac=1)
-    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, num_threads)
+    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, tree_distance_representation, num_cpus=num_threads)
     group_metrics = {}
     for r in results:
         for k in r:
