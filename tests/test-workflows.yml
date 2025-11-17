@@ -1868,3 +1868,157 @@
     contains:
       - 'WARNING: "does_not_exist" specified in the line list, but does not exist in the metadata.'
       - 'WARNING: "extra" specified in the line list, but does not exist in the metadata.'
+
+- name: Patristic Tree Distances
+  tags:
+    - tree_distances
+    - patristic_tree_distances
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --tree_distances patristic --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\tcount_country_Australia\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_NSW\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t3\t2\t0\t0\t3\t2\t5\t5\t0\t1\t0\t0\t3\t0\t1\tchicken,human\t2.0\t1.5\t2.0\t0.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t0\t1\t0\tchicken\t1.0\t1.0\t1.0\t1.0\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t0\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t0\t1\tchicken,human\t1.0\t1.0\t1.0\t1.0\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t0\t2\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t0\t2\t0\t0\t2\t2\t2\t0\t0\t0\t2\t0\t0\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/1/tree.nwk"
+      contains:
+        - "((B:0.5,(A:0.0,M:0.0):0.5):0.5,(K:0.5,L:0.5):0.5);"
+    - path: "results/2/tree.nwk"
+      contains:
+        - "(C:0.5,D:0.5);"
+    - path: "results/3/tree.nwk"
+      contains:
+        - "(E:0.5,F:0.5);"
+    - path: "results/4/tree.nwk"
+      contains:
+        - "(G:0.5,H:0.5);"
+    - path: "results/5/tree.nwk"
+      contains:
+        - "(I:0.5,J:0.5);"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
+
+- name: Cophenetic Tree Distances
+  tags:
+    - tree_distances
+    - cophenetic_tree_distances
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --tree_distances cophenetic --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\tcount_country_Australia\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_NSW\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t3\t2\t0\t0\t3\t2\t5\t5\t0\t1\t0\t0\t3\t0\t1\tchicken,human\t2.0\t1.5\t2.0\t0.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t0\t1\t0\tchicken\t1.0\t1.0\t1.0\t1.0\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t0\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t0\t1\tchicken,human\t1.0\t1.0\t1.0\t1.0\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t0\t2\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t0\t2\t0\t0\t2\t2\t2\t0\t0\t0\t2\t0\t0\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/1/tree.nwk"
+      contains:
+        - "((B:1.0,(A:0.0,M:0.0):1.0):1.0,(K:1.0,L:1.0):1.0);"
+    - path: "results/2/tree.nwk"
+      contains:
+        - "(C:1.0,D:1.0);"
+    - path: "results/3/tree.nwk"
+      contains:
+        - "(E:1.0,F:1.0);"
+    - path: "results/4/tree.nwk"
+      contains:
+        - "(G:1.0,H:1.0);"
+    - path: "results/5/tree.nwk"
+      contains:
+        - "(I:1.0,J:1.0);"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
