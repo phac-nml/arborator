@@ -3,6 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-11-17
+
+### Added
+
+- Additional XLSX-formatted output files for the cluster_summary.tsv and metadata.included.tsv files. [PR 27](https://github.com/phac-nml/arborator/pull/27)
+- A `tree_distances` parameter which instructs GAS to interpret distance matrices distances as either `cophenetic` (the distance at which two clusters or leaves cluster together) or `patristic` (the sum of branch lengths between clusters or leaves) [PR 29](https://github.com/phac-nml/arborator/pull/29)
+
+### Changed
+
+- Introduced better handling and warning messages for extra line list items. [PR #24](https://github.com/phac-nml/arborator/pull/24)
+
+### Fixed
+
+- Introduced fixes alongside a new version of profile_dists that fixes problems with non-string sample IDs (ex: 1, 2, 3.0). [PR 28](https://github.com/phac-nml/arborator/pull/28/)
+
 ## [1.1.0] - 2025-07-28
 
 ### Added
@@ -35,3 +50,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [1.0.6]: https://github.com/phac-nml/arborator/releases/tag/1.0.6
 [1.1.0]: https://github.com/phac-nml/arborator/releases/tag/1.1.0
+[1.2.0]: https://github.com/phac-nml/arborator/releases/tag/1.2.0

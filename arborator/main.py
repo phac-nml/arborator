@@ -13,7 +13,7 @@ from arborator.classes.read_data import read_data
 from arborator.classes.report import report
 from arborator.classes.split_profiles import split_profiles
 from genomic_address_service.classes.multi_level_clustering import multi_level_clustering
-from genomic_address_service.utils import format_threshold_map, write_threshold_map
+from genomic_address_service.utils import format_threshold_map
 from genomic_address_service.mcluster import write_clusters
 from genomic_address_service.constants import CLUSTER_METHODS
 import fastparquet as pq
@@ -77,6 +77,9 @@ CLUSTER_METHOD_KEY = "method"
 CLUSTER_METHOD_LONG = "--" + CLUSTER_METHOD_KEY
 CLUSTER_METHOD_SHORT = "-e"
 
+TREE_DISTANCES_KEY = "tree_distances"
+TREE_DISTANCES_LONG = "--" + TREE_DISTANCES_KEY
+
 FORCE_KEY = "force"
 FORCE_LONG = "--" + FORCE_KEY
 FORCE_SHORT = "-f"
@@ -95,13 +98,22 @@ GROUPED_METADATA_COLUMNS_KEY = "grouped_metadata_columns"
 LINELIST_COLUMNS_KEY = "linelist_columns"
 DISPLAY_KEY = "display"
 LABEL_KEY = "label"
+GAS_CLUSTER_ADDRESS_KEY = "gas_denovo_cluster_address"
+
+METADATA_INCLUDED_FILEPATH_TSV = "metadata.included.tsv"
+METADATA_INCLUDED_FILEPATH_EXCEL = "metadata.included.xlsx"
+METADATA_INCLUDED_SHEET_NAME = "Included Metadata"
+
+CLUSTER_SUMMARY_FILEPATH_TSV = "cluster_summary.tsv"
+CLUSTER_SUMMARY_FILEPATH_EXCEL = "cluster_summary.xlsx"
+CLUSTER_SUMMARY_SHEET_NAME = "Cluster Summary"
 
 PARAMETER_KEYS = [PROFILE_KEY, METADATA_KEY, CONFIG_KEY, OUTDIR_KEY,
                   PARTITION_COLUMN_KEY, ID_COLUMN_KEY, OUTLIER_THRESHOLD_KEY,
                   MINIMUM_MEMBERS_KEY, COUNT_MISSING_KEY, MISSING_THRESHOLD_KEY,
                   DISTANCE_METHOD_KEY, SKIP_QC_KEY, THRESHOLDS_KEY,
-                  DELIMITER_KEY, CLUSTER_METHOD_KEY, FORCE_KEY, THREADS_KEY,
-                  VERSION_KEY, ONLY_REPORT_LABELED_KEY,
+                  DELIMITER_KEY, CLUSTER_METHOD_KEY, TREE_DISTANCES_KEY,
+                  FORCE_KEY, THREADS_KEY, VERSION_KEY, ONLY_REPORT_LABELED_KEY,
                   GROUPED_METADATA_COLUMNS_KEY, LINELIST_COLUMNS_KEY]
 
 BOOLEAN_KEYS = [COUNT_MISSING_KEY, SKIP_QC_KEY, FORCE_KEY, ONLY_REPORT_LABELED_KEY]
@@ -167,6 +179,11 @@ def parse_args():
     parser.add_argument(DELIMITER_LONG, DELIMITER_SHORT, type=str, required=False, help='UNUSED: delimiter desired for nomenclature code')
     parser.add_argument(CLUSTER_METHOD_LONG, CLUSTER_METHOD_SHORT, type=str, required=False, help='cluster method [single, complete, average]',
                         default='average')
+    parser.add_argument(TREE_DISTANCES_LONG, type=str, required=False, default='patristic', choices=multi_level_clustering.VALID_TREE_DISTANCES,
+                        help=('Defines how distances in distance matrices are interpretted by GAS and represented in the output tree (Newick file). '
+                             'Use "patristic" to interpret distances in the matrix as sum of branch lengths between clusters or leaves, '
+                             'and "cophenetic" to interpret distances in the matrix as the minimum distance two clusters or leaves need '
+                             'to be in order to be grouped into the same cluster.'))
 
     parser.add_argument(FORCE_LONG, FORCE_SHORT, required=False, help='Overwrite existing directory',
                         action='store_true')
@@ -258,7 +275,8 @@ def stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_miss
 
     return files
 
-def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, min_members, num_cpus=1):
+def process_data(group_files, id_col, group_col, thresholds, outlier_thresh, method, min_members,
+                 tree_distance_representation, num_cpus=1):
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
     except AttributeError:
@@ -271,7 +289,8 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, 
 
     results = []
     for group_id in group_files:
-        results.append(pool.apply_async(process_group, (group_id,group_files[group_id],id_col,group_col,thresholds,outlier_thresh,method, min_members)))
+        results.append(pool.apply_async(process_group, (group_id, group_files[group_id], id_col, group_col, thresholds,
+                                                        outlier_thresh, method, tree_distance_representation, min_members)))
 
     pool.close()
     pool.join()
@@ -285,7 +304,8 @@ def process_data(group_files,id_col,group_col,thresholds,outlier_thresh,method, 
 
     return r
 
-def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thresh,method,min_members=2):
+def process_group(group_id, output_files, id_col, group_col, thresholds,
+                  outlier_thresh, method, tree_distance_representation, min_members=2):
     (allele_map, df) = process_profile(output_files[PROFILE_KEY], column_mapping={})
     l, p = convert_profiles(df)
     min_dist = 0
@@ -303,7 +323,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
                                                                           sep="\t")
 
         # perform clustering
-        mc = multi_level_clustering(output_files['matrix'], thresholds, method)
+        mc = multi_level_clustering(output_files['matrix'], thresholds, method, tree_distances=tree_distance_representation)
         memberships = mc.get_memberships()
         with open(output_files['tree'], 'w') as fh:
             fh.write(f"{mc.newick}\n")
@@ -319,15 +339,12 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         write_outliers(pairwise_outlier, output_files['outliers'])
 
         if os.path.isfile(output_files['clusters']) and os.path.isfile(output_files["metadata"]):
-            clust_df = pd.read_csv(output_files['clusters'],sep="\t",header=0)
+            clust_df = pd.read_csv(output_files['clusters'], sep="\t", header=0, dtype=str)
             clust_df = clust_df[['id','address']]
-            values = clust_df['address']
-            for idx,value in enumerate(values):
-                values[idx] = f'{group_id}|{value}'
-            clust_df['address'] = values
-            clust_df = clust_df.rename(columns={'id': id_col,'address':'gas_denovo_cluster_address'})
-            clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)     
-            metadata_df = pd.read_csv(output_files[METADATA_KEY],sep="\t",header=0)
+            clust_df['address'] = str(group_id) + "|" + clust_df['address'].astype(str) # appends "{group_id}|" to the address
+            clust_df = clust_df.rename(columns={'id': id_col,'address':GAS_CLUSTER_ADDRESS_KEY})
+            clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)
+            metadata_df = pd.read_csv(output_files[METADATA_KEY], sep="\t", header=0, dtype=str)
             pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False)
             del(clust_df)
             del(metadata_df)
@@ -342,7 +359,7 @@ def process_group(group_id,output_files,id_col,group_col,thresholds,outlier_thre
         'outlier_ids':",".join([str(x) for x in outlier_ids]),
         'metadata':metadata_summary
     }
-    }
+}
 
 def compile_group_data(group_metrics, field_data_types,id_col,field_name_key,field_name_value,header=[]):
     s = summarizer(header,group_metrics,field_data_types,field_name_key,field_name_value)
@@ -473,6 +490,7 @@ def cluster_reporter(config):
     outlier_thresh = config[OUTLIER_THRESHOLD_KEY]
     thresholds = config[THRESHOLDS_KEY]
     method = config[CLUSTER_METHOD_KEY]
+    tree_distance_representation = config[TREE_DISTANCES_KEY]
     force = config[FORCE_KEY]
     id_col = config[ID_COLUMN_KEY]
     partition_col = config[PARTITION_COLUMN_KEY]
@@ -661,7 +679,7 @@ def cluster_reporter(config):
         fh.write(json.dumps(run_data['threshold_map'], indent=4))
 
     group_files = stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_missing_frac=1)
-    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, num_threads)
+    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, tree_distance_representation, num_cpus=num_threads)
     group_metrics = {}
     for r in results:
         for k in r:
@@ -669,7 +687,7 @@ def cluster_reporter(config):
 
     #merge metadata files
 
-    summary_file = os.path.join(outdir, "cluster_summary.tsv")
+    summary_file = os.path.join(outdir, CLUSTER_SUMMARY_FILEPATH_TSV)
 
 
     summary_data = compile_group_data(group_metrics=group_metrics, field_data_types=cluster_summary_cols_properties,
@@ -697,6 +715,7 @@ def cluster_reporter(config):
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
     summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
+    summary_df.to_excel(os.path.join(outdir, CLUSTER_SUMMARY_FILEPATH_EXCEL), header=True, index=False, sheet_name=CLUSTER_SUMMARY_SHEET_NAME)
     
     if LINELIST_COLUMNS_KEY in config:
         line_list_columns = []
@@ -706,8 +725,8 @@ def cluster_reporter(config):
                 if linelist_cols_properties[f][DISPLAY_KEY]:
                     line_list_columns.append(f)
 
-    if not restrict_output and 'gas_denovo_cluster_address' not in line_list_columns:
-        line_list_columns.append('gas_denovo_cluster_address')
+    if not restrict_output and GAS_CLUSTER_ADDRESS_KEY not in line_list_columns:
+        line_list_columns.append(GAS_CLUSTER_ADDRESS_KEY)
 
     metadata_dfs = []
     for group_id in group_files:
@@ -732,13 +751,31 @@ def cluster_reporter(config):
 
     linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
 
-    # Check that the expected columns exist:
-    # This is mainly to catch when clusters aren't created
-    # and no 'cluster_id' column exists.
-    if set(line_list_columns).issubset(linelist_df.columns):
-        linelist_df = linelist_df[line_list_columns]
+    # Only try to load metadata columns that actually exists:
+    intersection = set(line_list_columns).intersection(set(linelist_df.columns))
+
+    # Ensure clustering was successful and therefore the GAS_CLUSTER_ADDRESS_KEY
+    # column exists in both the line list and dataframe:
+    if GAS_CLUSTER_ADDRESS_KEY in intersection:
+
+        # Warn about metadata columns specified in the line list that don't exist
+        # in the metadata. This warning is inside the conditional, otherwise
+        # it will report that GAS_CLUSTER_ADDRESS_KEY was specified in the
+        # line list, but doesn't exist, which isn't true. It's how arborator handles
+        # this data.
+        difference = set(line_list_columns).difference(set(linelist_df.columns))
+
+        for item in difference:
+            print(f'WARNING: "{item}" specified in the line list, but does not exist in the metadata.')
+
+        linelist_df = linelist_df[list(intersection)]
         linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
-        linelist_df.to_csv(os.path.join(outdir,"metadata.included.tsv"),sep="\t",header=True,index=False)
+
+        linelist_df.to_csv(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_TSV), sep="\t", header=True, index=False)
+        linelist_df.to_excel(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_EXCEL), header=True, index=False, sheet_name=METADATA_INCLUDED_SHEET_NAME)
+
+    else:
+        print(f'WARNING: Failed to generate any clusters! No "{METADATA_INCLUDED_FILEPATH_TSV}" will be generated.')
 
     run_data['analysis_end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     sys.stdout.flush()

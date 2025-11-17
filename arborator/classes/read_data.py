@@ -45,7 +45,7 @@ class read_data:
         '''
 
         if format == 'text':
-            df = pd.read_csv(file_path, header=0, sep="\t", low_memory=False)
+            df = pd.read_csv(file_path, header=0, sep="\t", low_memory=False, dtype=str)
         elif format == 'parquet':
             df = pd.read_parquet(
                 file_path,

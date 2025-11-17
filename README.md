@@ -76,7 +76,8 @@ The following tools and dependencies should be installed by the conda environmen
 - psutil
 - scipy
 - profile_dists
-- genomic_address_service
+- genomic_address_service>=0.3.0
+- openpyxl
 
 # Getting Started
 
@@ -116,6 +117,7 @@ The parameters are explained as follows:
 - `--missing_thresh`: (UNUSED) Maximum percentage of missing data allowed per locus (0 - 1)
 - `--thresholds` (`t`): vector of threshold levels for clustering
 - `--method` (`-e`): clustering method
+- `--tree_distances`: whether GAS interprets distance matrices distances as either `cophenetic` or `patristic`
 - `--force` (`-f`): overwrite existing output results
 - `--n_threads`: indicates numbers of threads to use with multithreading
 - `--version` (`-V`): prints version string
