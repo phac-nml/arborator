@@ -1,0 +1,15 @@
+{
+    "method": "average",
+    "partition_col": "outbreak",
+    "id_col": "sample_id",
+    "only_report_labeled_columns": "False",
+    
+    "grouped_metadata_columns":{ 
+        "outbreak":{ "data_type": "None","label":"Outbreak","default":"","display":"True"}
+    },
+
+    "linelist_columns":{
+        "sample_id":{ "data_type": "None","label":"Identifier","default":"","display":"True"},
+        "outbreak":{ "data_type": "None","label":"Outbreak","default":"","display":"True"}
+    }
+}
