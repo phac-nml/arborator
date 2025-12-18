@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- A problem where the first sample ID was never reported as an outlier ID.
-- A problem where outlier IDs with average distances above the threshold, but less than the next integer where not being reported.
+- A problem where the first sample ID was never reported as an outlier ID. [PR 33](https://github.com/phac-nml/arborator/pull/33)
+- A problem where outlier IDs with average distances above the threshold, but less than the next integer where not being reported. [PR 33](https://github.com/phac-nml/arborator/pull/33)
 
 ## [1.2.0] - 2025-11-17
 

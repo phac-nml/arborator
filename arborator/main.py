@@ -230,6 +230,8 @@ def get_pairwise_outliers(distance_matrix, thresh):
 
 def get_average_outliers(distance_matrix, thresh):
     num_samples = len(distance_matrix)
+    # Dividing by num_samples - 1, because the distance matrix
+    # includes the distance of each sample to itself (0):
     averages = distance_matrix.sum(axis=1) / (num_samples - 1)
     outliers = averages[averages.abs().gt(thresh)]
     average_outliers_list = list(outliers.index)
