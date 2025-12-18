@@ -4,6 +4,7 @@ import json
 import os
 from datetime import datetime
 import pandas as pd
+import numpy as np
 from statistics import mean, median
 import shutil
 from arborator.version import __version__
@@ -207,35 +208,45 @@ def remove_columns(df,missing_value,max_missing_frac=1):
 
     return df.drop(columns_to_remove, axis=1)
 
-def get_outliers_matrix(file_path, thresh,delim="\t"):
-    outliers = []
-    ave_dists = {}
-    with open(file_path, 'r') as f:
-        header = next(f).strip().split(delim)[1:]
-        offset = 2
-        for idx,value in enumerate(header[1:]):
-            ave_dists[value] = 0
-        for line in f:
-            
-            line_split = line.strip().split(delim)
+def get_pairwise_outliers(distance_matrix, thresh):
+    # Upper triangle of matrix to avoid duplicates:
+    pairwise_distances = distance_matrix.where(np.triu(distance_matrix, k=1).astype(bool)).stack()
 
-            if len(line_split) < 1:
-                continue
-            v = [float(x) for x in line_split[offset:]]
-            h = header[offset-1:]
-            for idx,value in enumerate(v):
-                ave_dists[h[idx]]+=value
-                if value > thresh:
-                    outliers.append([line_split[0],h[idx],value])
-            offset += 1
-    num_samples = len(ave_dists)
-    outlier_ids = list()
-    for id in ave_dists:
-        ave = ave_dists[id] / num_samples
-        if ave > thresh:
-            outlier_ids.append(id)
+    pairwise_outliers = pairwise_distances[pairwise_distances.abs().gt(thresh)]
+    pairwise_outliers_list = []
 
-    return (outlier_ids,outliers)
+    for outlier in pairwise_outliers.items():
+        # Every item in the series will look like:
+        # [[index1, index2], value]
+        indices = list(outlier[0])
+        value = [outlier[1]]
+
+        # New format: [index1, index2, value]
+        outlier = indices + value
+
+        pairwise_outliers_list.append(outlier)
+
+    return pairwise_outliers_list
+
+def get_average_outliers(distance_matrix, thresh):
+    num_samples = len(distance_matrix)
+    # Dividing by num_samples - 1, because the distance matrix
+    # includes the distance of each sample to itself (0):
+    averages = distance_matrix.sum(axis=1) / (num_samples - 1)
+    outliers = averages[averages.abs().gt(thresh)]
+    average_outliers_list = list(outliers.index)
+
+    return average_outliers_list
+
+def get_outliers(file_path, thresh, delim="\t"):
+    PROFILE_DISTS_ID_INDEX = "dists" # This is not exposed in profile_dists.
+    distance_matrix = pd.read_csv(file_path, sep=delim)
+    distance_matrix = distance_matrix.set_index(PROFILE_DISTS_ID_INDEX)
+
+    average_outliers_list = get_average_outliers(distance_matrix, thresh)
+    pairwise_outliers_list = get_pairwise_outliers(distance_matrix, thresh)
+
+    return (average_outliers_list, pairwise_outliers_list)
 
 def write_outliers(outliers,outfile):
     with open(outfile, 'w') as f:
@@ -335,7 +346,7 @@ def process_group(group_id, output_files, id_col, group_col, thresholds,
         med_dist = median(dists)
         max_dist = max(dists)
         report(df, [id_col]).write_data(output_files['summary'])
-        (outlier_ids, pairwise_outlier) = get_outliers_matrix(output_files['matrix'], outlier_thresh, delim="\t")
+        (outlier_ids, pairwise_outlier) = get_outliers(output_files['matrix'], outlier_thresh, delim="\t")
         write_outliers(pairwise_outlier, output_files['outliers'])
 
         if os.path.isfile(output_files['clusters']) and os.path.isfile(output_files["metadata"]):
