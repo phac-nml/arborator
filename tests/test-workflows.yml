@@ -2112,7 +2112,7 @@
   tags:
     - sorted_profile
     - sorted_unsorted
-  command: arborator --profile tests/data/profile_sorted.tsv --metadata tests/data/metadata_sorted_unsorted.tsv --config tests/data/config_sorted_unsorted.json --outdir results
+  command: arborator --profile tests/data/profile_sorted.tsv --metadata tests/data/metadata_sorted_unsorted.tsv --config tests/data/config_sorted_unsorted.json --sort_matrix --outdir results
   stdout:
     must_not_contain:
       - "parameter unrecognized"
@@ -2135,7 +2135,7 @@
   tags:
     - unsorted_profile
     - sorted_unsorted
-  command: arborator --profile tests/data/profile_unsorted.tsv --metadata tests/data/metadata_sorted_unsorted.tsv --config tests/data/config_sorted_unsorted.json --outdir results
+  command: arborator --profile tests/data/profile_unsorted.tsv --metadata tests/data/metadata_sorted_unsorted.tsv --config tests/data/config_sorted_unsorted.json  --sort_matrix --outdir results
   stdout:
     must_not_contain:
       - "parameter unrecognized"
