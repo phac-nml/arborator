@@ -334,7 +334,7 @@ def process_group(group_id, output_files, id_col, group_col, thresholds,
                                                                           sep="\t")
 
         # perform clustering
-        mc = multi_level_clustering(output_files['matrix'], thresholds, method, tree_distances=tree_distance_representation)
+        mc = multi_level_clustering(output_files['matrix'], thresholds, method, True, tree_distances=tree_distance_representation)
         memberships = mc.get_memberships()
         with open(output_files['tree'], 'w') as fh:
             fh.write(f"{mc.newick}\n")

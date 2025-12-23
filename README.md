@@ -76,7 +76,7 @@ The following tools and dependencies should be installed by the conda environmen
 - psutil
 - scipy
 - profile_dists
-- genomic_address_service>=0.3.0
+- genomic_address_service>=0.3.1
 - openpyxl
 
 # Getting Started
