@@ -12,7 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-A `--sort_matrix` option, which causes GAS to sort the sample IDs in the distance matrix. The order of samples IDs in this distance matrix rarely affects clustering labels, in particular when the clustering method is tie-breaking between equal distances. [PR 34](https://github.com/phac-nml/arborator/pull/34)
+- A `--sort_matrix` option, which causes GAS to sort the sample IDs in the distance matrix. The order of samples IDs in this distance matrix rarely affects clustering labels, in particular when the clustering method is tie-breaking between equal distances. [PR 34](https://github.com/phac-nml/arborator/pull/34)
+
+### Changed
+
+- setup.py to remove deprecations.
 
 ## [1.2.0] - 2025-11-17
 
