@@ -1,0 +1,11 @@
+sample_id	country	state/province	organism	score	host	cluster_id
+1_ingroup_10	Canada	Ontario	Salmonella enterica	1	chicken	1
+1_ingroup_11	Canada	British Columbia	Salmonella enterica	1	chicken	1
+1_ingroup_12	United States	New York	Salmonella enterica	1	chicken	1
+1_ingroup_13	United States	California	Salmonella enterica	2	chicken	1
+1_ingroup_14	Canada	Ontario	Salmonella enterica	3	chicken	1
+1_outgroup_15	Canada	British Columbia	Salmonella enterica	4	human	1
+1_outgroup_16	United States	New York	Salmonella enterica	5	human	1
+1_outgroup_17	United States	New York	Salmonella enterica	2	human	1
+1_outgroup_18	United Kingdom	England	Salmonella enterica	1	human	1
+1_outgroup_19	United Kingdom	England	Salmonella enterica	1	human	1
