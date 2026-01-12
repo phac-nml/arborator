@@ -3,6 +3,17 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-01-12
+
+### Fixed
+
+- A problem where the first sample ID was never reported as an outlier ID. [PR 33](https://github.com/phac-nml/arborator/pull/33)
+- A problem where outlier IDs with average distances above the threshold, but less than the next integer where not being reported. [PR 33](https://github.com/phac-nml/arborator/pull/33)
+
+### Added
+
+A `--sort_matrix` option, which causes GAS to sort the sample IDs in the distance matrix. The order of samples IDs in this distance matrix rarely affects clustering labels, in particular when the clustering method is tie-breaking between equal distances. [PR 34](https://github.com/phac-nml/arborator/pull/34)
+
 ## [1.2.0] - 2025-11-17
 
 ### Added
@@ -51,3 +62,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.0.6]: https://github.com/phac-nml/arborator/releases/tag/1.0.6
 [1.1.0]: https://github.com/phac-nml/arborator/releases/tag/1.1.0
 [1.2.0]: https://github.com/phac-nml/arborator/releases/tag/1.2.0
+[1.2.1]: https://github.com/phac-nml/arborator/releases/tag/1.2.1
