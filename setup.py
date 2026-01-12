@@ -8,7 +8,6 @@ author = 'James Robertson'
 classifiers = """
 Development Status :: 4 - Beta
 Environment :: Console
-License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
 Intended Audience :: Science/Research
 Topic :: Scientific/Engineering
 Topic :: Scientific/Engineering :: Bio-Informatics
@@ -34,10 +33,9 @@ setup(
     version=__version__,
     python_requires='>=3.8.2,<3.12',
     setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
     packages=find_packages(exclude=['tests']),
     url='https://github.com/phac-nml/arborator',
-    license='GPLv3',
+    license='GPL-3.0-or-later',
     author='James Robertson',
     author_email='james.robertson@phac-aspc.gc.ca',
     description=(
