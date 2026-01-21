@@ -20,7 +20,9 @@ class report:
                 'value_counts': {},
                 'shannon_entropy': -1,
             }
-            unique_values = dict(df[col].astype(str).value_counts())
+            unique_values = df[col].value_counts(dropna=True)
+            unique_values.index = unique_values.index.astype(str)
+            unique_values = dict(unique_values)
 
             if missing_data in unique_values:
                 locus['num_missing'] = unique_values[missing_data]
