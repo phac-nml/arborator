@@ -203,18 +203,22 @@ def parse_args():
     return parser.parse_args()
 
 def remove_columns(df,missing_value,max_missing_frac=1):
-    columns = list(df.columns)
-    columns_to_remove = []
-    num_records = len(df)
-    for col in columns:
-        unique_values = dict(df[col].astype(str).value_counts())
-        if missing_value in unique_values:
-            n = unique_values[missing_value]
-            frac = n / num_records
-            if frac > max_missing_frac:
-                columns_to_remove.append(col)
+    if max_missing_frac != 1:
+        columns = list(df.columns)
+        columns_to_remove = []
+        num_records = len(df)
+        for col in columns:
+            unique_values = dict(df[col].astype(str).value_counts())
+            if missing_value in unique_values:
+                n = unique_values[missing_value]
+                frac = n / num_records
+                if frac > max_missing_frac:
+                    columns_to_remove.append(col)
 
-    return df.drop(columns_to_remove, axis=1)
+        return df.drop(columns_to_remove, axis=1)
+    else:
+        columns_to_remove = []
+        return df.drop(columns_to_remove, axis=1)
 
 def get_pairwise_outliers(distance_matrix, thresh):
     # Upper triangle of matrix to avoid duplicates:
