@@ -2135,7 +2135,7 @@
   tags:
     - unsorted_profile
     - sorted_unsorted
-  command: arborator --profile tests/data/profile_unsorted.tsv --metadata tests/data/metadata_sorted_unsorted.tsv --config tests/data/config_sorted_unsorted.json  --sort_matrix --outdir results
+  command: arborator --profile tests/data/profile_unsorted.tsv --metadata tests/data/metadata_sorted_unsorted.tsv --config tests/data/config_sorted_unsorted.json --sort_matrix --outdir results
   stdout:
     must_not_contain:
       - "parameter unrecognized"
@@ -2153,3 +2153,40 @@
         - "1_outgroup_17\t1|5.5.5.5.8.9"
         - "1_outgroup_18\t1|3.3.3.3.6.7"
         - "1_outgroup_19\t1|6.6.6.6.9.10"
+
+- name: No Metadata
+  tags:
+    - metadata
+    - metadata_no_metadata
+  command: arborator --profile tests/data/profile_no_metadata.tsv --metadata tests/data/metadata_no_metadata.tsv --config tests/data/config_no_metadata.json --outdir results
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "Outbreak Code\tOrganism\tSubtype\tCountry of Collection\tSerovar\tPatient Age (years)\tDate\tSource Type\tSpecial\tage_max_value\tage_mean_value\tage_median_value\tage_min_value\tcount_members\tcount_outliers\tcount_sample_S1\tcount_sample_S2\tcount_sample_S3\tcount_sample_S4\tcount_sample_S5\tcount_sample_S6\tdate_max_value\tdate_min_value\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tsample"
+        - "1\t\t\t\t\t\t\t\t\tnan\tnan\tnan\tnan\t2\t0\t1\t1\t0\t0\t0\t0\tnan\tnan\t3.0\t3.0\t3.0\t3.0\t\tS1,S2"
+        - "2\t\t\t\t\t\t\t\t\tnan\tnan\tnan\tnan\t2\t0\t0\t0\t1\t1\t0\t0\tnan\tnan\t2.0\t2.0\t2.0\t2.0\t\tS3,S4"
+        - "3\t\t\t\t\t\t\t\t\tnan\tnan\tnan\tnan\t1\t0\t0\t0\t0\t0\t1\t0\tnan\tnan\t0\t0\t0\t0\t\tS5"
+        - "unassociated\t\t\t\t\t\t\t\t\tnan\tnan\tnan\tnan\t1\t0\t0\t0\t0\t0\t0\t1\tnan\tnan\t0\t0\t0\t0\t\tS6"
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.tsv"
+      contains:
+        - "Sample\tOutbreak Code\tOrganism\tSubtype\tCountry of Collection\tSerovar\tPatient Age (years)\tDate\tSource Type\tSpecial\tgas_denovo_cluster_address"
+        - "S1\t1\t\t\t\t\t\t\t\t\t1|1.1.1.1.1"
+        - "S2\t1\t\t\t\t\t\t\t\t\t1|1.1.2.2.2"
+        - "S3\t2\t\t\t\t\t\t\t\t\t2|1.1.1.1.1"
+        - "S4\t2\t\t\t\t\t\t\t\t\t2|1.1.1.2.2"
+        - "S5\t3\t\t\t\t\t\t\t\t\t"
+        - "S6\tunassociated\t\t\t\t\t\t\t\t\t"
+    - path: "results/metadata.included.xlsx"
+    - path: "results/metadata.overlap.tsv"
+      contains:
+        - "sample_name\tsample\toutbreak\torganism\tsubtype\tcountry\tserovar\tage\tdate\tsource\tspecial"
+        - "S1\tS1\t1\t\t\t\t\t\t\t\t"
+        - "S2\tS2\t1\t\t\t\t\t\t\t\t"
+        - "S3\tS3\t2\t\t\t\t\t\t\t\t"
+        - "S4\tS4\t2\t\t\t\t\t\t\t\t"
+        - "S5\tS5\t3\t\t\t\t\t\t\t\t"
+        - "S6\tS6\tunassociated\t\t\t\t\t\t\t\t"
