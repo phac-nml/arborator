@@ -1,0 +1,34 @@
+{
+    "outlier_thresh": "25",
+    "method": "average",
+    "thresholds": "10,5,2,1,0",
+    "min_members": 2,
+    "partition_col": "outbreak",
+    "id_col": "sample_name",
+    "only_report_labeled_columns": "False",
+    
+    "grouped_metadata_columns":{ 
+        "outbreak": { "data_type": "None", "label": "Outbreak Code", "default": "", "display": "True" },
+        "organism": { "data_type": "None", "label": "Organism", "default": "", "display": "True" },
+        "subtype": { "data_type": "None", "label": "Subtype", "default": "", "display": "True" },
+        "country": { "data_type": "Categorical", "label": "Country of Collection", "default": "", "display": "True" },
+        "serovar": { "data_type": "Categorical", "label": "Serovar", "default": "", "display": "True" },
+        "age": { "data_type": "desc_stats", "label": "Patient Age (years)", "default": "", "display": "True" },
+        "date": { "data_type": "min_max", "label": "Date", "default": "", "display": "True" },
+        "source": { "data_type": "Categorical", "label": "Source Type", "default": "", "display": "True" },
+        "special": { "data_type": "Categorical", "label": "Special", "default": "", "display": "True" }
+    },
+
+    "linelist_columns":{
+        "sample_name": { "data_type": "None", "label": "Sample", "default": "", "display": "True" },
+        "outbreak": { "data_type": "None", "label": "Outbreak Code", "default": "", "display": "True" },
+        "organism": { "data_type": "None", "label": "Organism", "default": "", "display": "True" },
+        "subtype": { "data_type": "None", "label": "Subtype", "default": "", "display": "True" },
+        "country": { "data_type": "Categorical", "label": "Country of Collection", "default": "", "display": "True" },
+        "serovar": { "data_type": "Categorical", "label": "Serovar", "default": "", "display": "True" },
+        "age": { "data_type": "desc_stats", "label": "Patient Age (years)", "default": "", "display": "True" },
+        "date": { "data_type": "min_max", "label": "Date", "default": "", "display": "True" },
+        "source": { "data_type": "Categorical", "label": "Source Type", "default": "", "display": "True" },
+        "special": { "data_type": "Categorical", "label": "Special", "default": "", "display": "True" }
+    }
+}
