@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- A problem with summarizing metadata when all entries are missing. [PR 37](https://github.com/phac-nml/arborator/pull/37)
+
 ## [1.2.1] - 2025-01-12
 
 ### Fixed
