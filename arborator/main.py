@@ -203,18 +203,22 @@ def parse_args():
     return parser.parse_args()
 
 def remove_columns(df,missing_value,max_missing_frac=1):
-    columns = list(df.columns)
-    columns_to_remove = []
-    num_records = len(df)
-    for col in columns:
-        unique_values = dict(df[col].astype(str).value_counts())
-        if missing_value in unique_values:
-            n = unique_values[missing_value]
-            frac = n / num_records
-            if frac > max_missing_frac:
-                columns_to_remove.append(col)
+    if max_missing_frac != 1:
+        columns = list(df.columns)
+        columns_to_remove = []
+        num_records = len(df)
+        for col in columns:
+            unique_values = dict(df[col].astype(str).value_counts())
+            if missing_value in unique_values:
+                n = unique_values[missing_value]
+                frac = n / num_records
+                if frac > max_missing_frac:
+                    columns_to_remove.append(col)
 
-    return df.drop(columns_to_remove, axis=1)
+        return df.drop(columns_to_remove, axis=1)
+    else:
+        columns_to_remove = []
+        return df.drop(columns_to_remove, axis=1)
 
 def get_pairwise_outliers(distance_matrix, thresh):
     # Upper triangle of matrix to avoid duplicates:
@@ -289,8 +293,8 @@ def stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_miss
                 os.remove(files[group_id][fname])
 
         df = remove_columns(groups[group_id], '0', max_missing_frac=max_missing_frac)
-        df.to_csv(files[group_id][PROFILE_KEY], sep="\t", header=True, index=False)
-        metadata_df[metadata_df[id_col].isin(list(groups[group_id][id_col]))].to_csv(files[group_id]['metadata'], sep="\t", header=True, index=False)
+        df.to_csv(files[group_id][PROFILE_KEY], sep="\t", header=True, index=False, chunksize=1000)
+        metadata_df[metadata_df[id_col].isin(list(groups[group_id][id_col]))].to_csv(files[group_id]['metadata'], sep="\t", header=True, index=False, chunksize=1000)
 
     return files
 
@@ -341,7 +345,7 @@ def process_group(group_id, output_files, id_col, group_col, thresholds,
         # compute distances
         calc_distances_hamming(p, l, p, l, output_files['parquet_matrix'], len(l))
         pq.ParquetFile(output_files['parquet_matrix']).to_pandas().to_csv(output_files['matrix'], index=False, header=True,
-                                                                          sep="\t")
+                                                                          sep="\t", chunksize=1000)
 
         # perform clustering
         mc = multi_level_clustering(output_files['matrix'], thresholds, method, sort_matrix, tree_distances=tree_distance_representation)
@@ -364,7 +368,7 @@ def process_group(group_id, output_files, id_col, group_col, thresholds,
             clust_df = clust_df[['id','address']]
             clust_df['address'] = str(group_id) + "|" + clust_df['address'].astype(str) # appends "{group_id}|" to the address
             clust_df = clust_df.rename(columns={'id': id_col,'address':GAS_CLUSTER_ADDRESS_KEY})
-            clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False)
+            clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False, chunksize=1000)
             metadata_df = pd.read_csv(output_files[METADATA_KEY], sep="\t", header=0, dtype=str)
             pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False)
             del(clust_df)
@@ -640,7 +644,7 @@ def cluster_reporter(config):
         os.makedirs(outdir, 0o755)
 
     (allele_map, profile_df) = process_profile(profile_file, column_mapping={})
-    profile_df = profile_df.copy()
+    #profile_df = profile_df.copy()
     profile_df.insert(0, id_col, profile_df.index.to_list())
 
     #write allele mapping file
@@ -666,8 +670,7 @@ def cluster_reporter(config):
     run_data['count_missing_metadata_samples'] = len(missing_metadata_samples)
     run_data['missing_metadata_samples'] = ",".join(sorted(list(missing_metadata_samples)))
     ovl_samples = list(ovl_samples)
-
-    metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False)
+    metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False, chunksize=1000)
     split = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col)
     groups = split.subsets
     group_file_mapping = split.group_file_mapping
@@ -693,7 +696,7 @@ def cluster_reporter(config):
 
     linelist_df = prepare_linelist({}, metadata_df[metadata_df[id_col].isin(list(set(metadata_df[id_col].to_list()) - set(filtered_samples)))], columns=[])
     linelist_df = linelist_df[line_list_columns]
-    linelist_df.to_csv(os.path.join(outdir, "metadata.excluded.tsv"), sep="\t", header=True, index=False)
+    linelist_df.to_csv(os.path.join(outdir, "metadata.excluded.tsv"), sep="\t", header=True, index=False, chunksize=1000)
     del(linelist_df)
 
     run_data['threshold_map'] = format_threshold_map(thresholds)
@@ -736,7 +739,7 @@ def cluster_reporter(config):
     for k in cluster_display_cols_to_remove:
         del(cluster_summary_cols_properties[k])
     summary_df = update_column_order(summary_df, cluster_summary_cols_properties, restrict=restrict_output)
-    summary_df.to_csv(summary_file, sep="\t", index=False, header=True)
+    summary_df.to_csv(summary_file, sep="\t", index=False, header=True, chunksize=1000)
     summary_df.to_excel(os.path.join(outdir, CLUSTER_SUMMARY_FILEPATH_EXCEL), header=True, index=False, sheet_name=CLUSTER_SUMMARY_SHEET_NAME)
     
     if LINELIST_COLUMNS_KEY in config:
@@ -770,8 +773,7 @@ def cluster_reporter(config):
         if num_members < min_members:
             directory_name = group_file_mapping[group_id]
             shutil.rmtree(os.path.join(outdir, directory_name))
-
-    linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
+    linelist_df = pd.concat((df for df in metadata_dfs), ignore_index=True, sort=False)
 
     # Only try to load metadata columns that actually exists:
     intersection = set(line_list_columns).intersection(set(linelist_df.columns))
@@ -793,7 +795,7 @@ def cluster_reporter(config):
         linelist_df = linelist_df[list(intersection)]
         linelist_df = update_column_order(linelist_df, linelist_cols_properties, restrict=restrict_output)
 
-        linelist_df.to_csv(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_TSV), sep="\t", header=True, index=False)
+        linelist_df.to_csv(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_TSV), sep="\t", header=True, index=False, chunksize=1000)
         linelist_df.to_excel(os.path.join(outdir, METADATA_INCLUDED_FILEPATH_EXCEL), header=True, index=False, sheet_name=METADATA_INCLUDED_SHEET_NAME)
 
     else:
