@@ -370,7 +370,7 @@ def process_group(group_id, output_files, id_col, group_col, thresholds,
             clust_df = clust_df.rename(columns={'id': id_col,'address':GAS_CLUSTER_ADDRESS_KEY})
             clust_df.to_csv(output_files['clusters'],header=True,sep="\t",index=False, chunksize=1000)
             metadata_df = pd.read_csv(output_files[METADATA_KEY], sep="\t", header=0, dtype=str)
-            pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False, chunksize=1000)
+            pd.merge(metadata_df, clust_df, on=id_col).to_csv(output_files[METADATA_KEY],sep="\t",header=True,index=False)
             del(clust_df)
             del(metadata_df)
 
@@ -670,7 +670,6 @@ def cluster_reporter(config):
     run_data['count_missing_metadata_samples'] = len(missing_metadata_samples)
     run_data['missing_metadata_samples'] = ",".join(sorted(list(missing_metadata_samples)))
     ovl_samples = list(ovl_samples)
-    print(metadata_df[metadata_df[id_col].isin(ovl_samples)])
     metadata_df[metadata_df[id_col].isin(ovl_samples)].to_csv(os.path.join(outdir,"metadata.overlap.tsv"),sep="\t",header=True,index=False, chunksize=1000)
     split = split_profiles(profile_df[profile_df[id_col].isin(ovl_samples)],os.path.join(outdir,"metadata.overlap.tsv"),id_col,partition_col)
     groups = split.subsets
