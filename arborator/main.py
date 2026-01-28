@@ -773,8 +773,7 @@ def cluster_reporter(config):
         if num_members < min_members:
             directory_name = group_file_mapping[group_id]
             shutil.rmtree(os.path.join(outdir, directory_name))
-
-    linelist_df = pd.concat(metadata_dfs, ignore_index=True, sort=False)
+    linelist_df = pd.concat((df for df in metadata_dfs), ignore_index=True, sort=False)
 
     # Only try to load metadata columns that actually exists:
     intersection = set(line_list_columns).intersection(set(linelist_df.columns))
