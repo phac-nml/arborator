@@ -644,7 +644,6 @@ def cluster_reporter(config):
         os.makedirs(outdir, 0o755)
 
     (allele_map, profile_df) = process_profile(profile_file, column_mapping={})
-    #profile_df = profile_df.copy()
     profile_df.insert(0, id_col, profile_df.index.to_list())
 
     #write allele mapping file
