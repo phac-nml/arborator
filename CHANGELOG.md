@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-01-30
+
+### Modified
+
+- Modified `remove_columns` function in `main.py` to perform calculating the percentage of missing alleles at each locus when `--missing_thresh` is between `0-1`. `1`,the default, no columns are dropped, and the calculation is unnecessary. The `--missing_thresh` parameter is currently an unused, and `remove_columns` is currently never performed. We are maintaining support for future functionality of `--missing_thresh`.
+
 ## [1.2.1] - 2025-01-12
 
 ### Fixed
