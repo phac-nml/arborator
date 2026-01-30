@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Modified `remove_columns` function in `main.py` to perform calculating the percentage of missing alleles at each locus when `--missing_thresh` is between `0-1`. `1`,the default, no columns are dropped, and the calculation is unnecessary. The `--missing_thresh` parameter is currently an unused, and `remove_columns` is currently never performed. We are maintaining support for future functionality of `--missing_thresh`. [PR 38](https://github.com/phac-nml/arborator/pull/38)
 
+<<<<<<< HEAD
 ### Fixed
 
 - A problem with summarizing metadata when all entries are missing. [PR 37](https://github.com/phac-nml/arborator/pull/37)
 
 ## [1.2.1] - 2025-01-12
+=======
+## [1.2.1] - 2026-01-12
+>>>>>>> 7dcea8c (Update version and CHANGELOG for release)
 
 ### Fixed
 
@@ -77,3 +81,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.1.0]: https://github.com/phac-nml/arborator/releases/tag/1.1.0
 [1.2.0]: https://github.com/phac-nml/arborator/releases/tag/1.2.0
 [1.2.1]: https://github.com/phac-nml/arborator/releases/tag/1.2.1
+[1.2.2]: https://github.com/phac-nml/arborator/releases/tag/1.2.2
