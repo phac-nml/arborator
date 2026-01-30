@@ -66,10 +66,10 @@ class summarizer:
 
     def calc_desc_stats_numerical(self,values):
         s = {
-            'min':0,
-            'median':0,
-            'mean':0,
-            'max':0,
+            'min':'nan',
+            'median':'nan',
+            'mean':'nan',
+            'max':'nan',
         }
         if len(values) > 0:
             s = {
@@ -83,10 +83,10 @@ class summarizer:
     def calc_desc_stats_dates(self,values):
         values = sorted(self.convert_date(values))
         s = {
-            'min': '',
-            'median': '',
-            'mean': '',
-            'max': '',
+            'min': 'nan',
+            'median': 'nan',
+            'mean': 'nan',
+            'max': 'nan',
         }
         if len(values) > 0:
             s = {
