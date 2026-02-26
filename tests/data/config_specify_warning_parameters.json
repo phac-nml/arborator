@@ -8,7 +8,7 @@
     "only_report_labeled_columns": "False",
     "skip_qc": "True",
     "missing_thresh": 5,
-    "distm": "scaled",
+    "distm": "hamming",
     "count_missing": "True",
     "delimiter": ".",
     

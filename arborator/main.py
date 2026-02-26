@@ -9,7 +9,7 @@ from statistics import mean, median
 import shutil
 from arborator.version import __version__
 from arborator.classes.aggregator import summarizer
-from profile_dists.utils import convert_profiles, calc_distances_hamming, process_profile
+from profile_dists.utils import convert_profiles, calc_distances_hamming, calc_distances_scaled, process_profile
 from arborator.classes.read_data import read_data
 from arborator.classes.report import report
 from arborator.classes.split_profiles import split_profiles
@@ -129,6 +129,11 @@ TRUE_STRINGS = ["t", "true"]
 # Expected to check lowercase:
 FALSE_STRINGS = ["f", "false"]
 
+# Distance Methods:
+HAMMING_DISTANCE = "hamming"
+SCALED_DISTANCE = "scaled"
+DISTANCE_METHODS = [HAMMING_DISTANCE, SCALED_DISTANCE]
+
 def parse_args():
     """ Argument Parsing method.
 
@@ -176,7 +181,9 @@ def parse_args():
                         action='store_true')
     parser.add_argument(MISSING_THRESHOLD_LONG, type=float, required=False,
                         help='UNUSED: Maximum percentage of missing data allowed per locus (0 - 1)')
-    parser.add_argument(DISTANCE_METHOD_LONG, type=str, required=False, help='UNUSED: Distance method raw hamming or scaled difference [hamming, scaled]')
+    parser.add_argument(DISTANCE_METHOD_LONG, type=str, required=False,
+                        help='The distance method to use: raw hamming or scaled difference.',
+                        choices=DISTANCE_METHODS, default=HAMMING_DISTANCE)
     parser.add_argument(SKIP_QC_LONG, SKIP_QC_SHORT, required=False, help='UNUSED: Skip QA/QC steps',
                         action='store_true')
     #GAS
@@ -298,7 +305,7 @@ def stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_miss
 
     return files
 
-def process_data(group_files, id_col, group_col, thresholds, outlier_thresh, method, min_members,
+def process_data(group_files, id_col, group_col, thresholds, outlier_thresh, cluster_method, distance_method, min_members,
                  tree_distance_representation, sort_matrix, num_cpus=1):
     try:
         sys_num_cpus = len(os.sched_getaffinity(0))
@@ -313,7 +320,7 @@ def process_data(group_files, id_col, group_col, thresholds, outlier_thresh, met
     results = []
     for group_id in group_files:
         results.append(pool.apply_async(process_group, (group_id, group_files[group_id], id_col, group_col, thresholds,
-                                                        outlier_thresh, method, tree_distance_representation, sort_matrix,
+                                                        outlier_thresh, cluster_method, distance_method, tree_distance_representation, sort_matrix,
                                                         min_members)))
 
     pool.close()
@@ -329,7 +336,7 @@ def process_data(group_files, id_col, group_col, thresholds, outlier_thresh, met
     return r
 
 def process_group(group_id, output_files, id_col, group_col, thresholds,
-                  outlier_thresh, method, tree_distance_representation,
+                  outlier_thresh, cluster_method, distance_method, tree_distance_representation,
                   sort_matrix, min_members=2):
     (allele_map, df) = process_profile(output_files[PROFILE_KEY], column_mapping={})
     l, p = convert_profiles(df)
@@ -343,12 +350,19 @@ def process_group(group_id, output_files, id_col, group_col, thresholds,
 
     if len(l) >= min_members:
         # compute distances
-        calc_distances_hamming(p, l, p, l, output_files['parquet_matrix'], len(l))
+        if distance_method == SCALED_DISTANCE:
+            calc_distances_scaled(p, l, p, l, output_files['parquet_matrix'], len(l))
+        elif distance_method == HAMMING_DISTANCE:
+            calc_distances_hamming(p, l, p, l, output_files['parquet_matrix'], len(l))
+        else:
+            message = f"Unrecognized distance method: {distance_method}"
+            raise Exception(message)
+
         pq.ParquetFile(output_files['parquet_matrix']).to_pandas().to_csv(output_files['matrix'], index=False, header=True,
                                                                           sep="\t")
 
         # perform clustering
-        mc = multi_level_clustering(output_files['matrix'], thresholds, method, sort_matrix, tree_distances=tree_distance_representation)
+        mc = multi_level_clustering(output_files['matrix'], thresholds, cluster_method, sort_matrix, tree_distances=tree_distance_representation)
         memberships = mc.get_memberships()
         with open(output_files['tree'], 'w') as fh:
             fh.write(f"{mc.newick}\n")
@@ -514,7 +528,7 @@ def cluster_reporter(config):
     outdir = config[OUTDIR_KEY]
     outlier_thresh = config[OUTLIER_THRESHOLD_KEY]
     thresholds = config[THRESHOLDS_KEY]
-    method = config[CLUSTER_METHOD_KEY]
+    cluster_method = config[CLUSTER_METHOD_KEY]
     tree_distance_representation = config[TREE_DISTANCES_KEY]
     force = config[FORCE_KEY]
     sort_matrix = config[SORT_MATRIX_KEY]
@@ -523,11 +537,11 @@ def cluster_reporter(config):
     min_members = config[MINIMUM_MEMBERS_KEY]
     num_threads = config[THREADS_KEY]
     restrict_output = config[ONLY_REPORT_LABELED_KEY]
+    distance_method = config[DISTANCE_METHOD_KEY]
 
     # Unused parameters:
     skip_qc = config[SKIP_QC_KEY]
     missing_thresh = config[MISSING_THRESHOLD_KEY]
-    distm = config[DISTANCE_METHOD_KEY]
     count_missing = config[COUNT_MISSING_KEY]
     delimiter = config[DELIMITER_KEY]
 
@@ -539,9 +553,6 @@ def cluster_reporter(config):
 
     if(missing_thresh):
         print(f'WARNING: missing threshold ({MISSING_THRESHOLD_LONG}) was provided, but this parameter is currently unused.')
-
-    if(distm):
-        print(f'WARNING: distance method ({DISTANCE_METHOD_LONG}) was provided, but this parameter is currently unused.')
 
     # See above comment for skip_qc.
     if(count_missing):
@@ -620,8 +631,8 @@ def cluster_reporter(config):
 
     thresholds = process_thresholds(thresholds)
 
-    if not method in CLUSTER_METHODS:
-        message = f'Linkage method supplied is invalid: {method}, it needs to be one of average, single, complete'
+    if not cluster_method in CLUSTER_METHODS:
+        message = f'Linkage method supplied is invalid: {cluster_method}, it needs to be one of average, single, complete'
         raise Exception(message)
 
     if not isinstance(min_members, int):
@@ -704,7 +715,7 @@ def cluster_reporter(config):
         fh.write(json.dumps(run_data['threshold_map'], indent=4))
 
     group_files = stage_data(groups, outdir, metadata_df, id_col, group_file_mapping, max_missing_frac=1)
-    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, method, min_members, tree_distance_representation, sort_matrix, num_cpus=num_threads)
+    results = process_data(group_files, id_col, partition_col, thresholds, outlier_thresh, cluster_method, distance_method, min_members, tree_distance_representation, sort_matrix, num_cpus=num_threads)
     group_metrics = {}
     for r in results:
         for k in r:
