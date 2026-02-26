@@ -117,6 +117,7 @@ The parameters are explained as follows:
 - `--missing_thresh`: (UNUSED) Maximum percentage of missing data allowed per locus (0 - 1)
 - `--thresholds` (`t`): vector of threshold levels for clustering
 - `--method` (`-e`): clustering method
+- `--distm`: the method for measuring distance between two profiles (`hamming` or `scaled`)
 - `--tree_distances`: whether GAS interprets distance matrices distances as either `cophenetic` or `patristic`
 - `--sort_matrix`: whether GAS sorts the sample IDs in the distance matrix, which rarely has an effect on cluster assignments when tie-breaking between equal distances during clustering
 - `--force` (`-f`): overwrite existing output results
