@@ -416,13 +416,12 @@
   tags:
     - parameter_warnings
     - parameter_warnings_command_line
-  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --skip_qc --missing_thresh 5 --distm scaled --count_missing --delimiter "."  --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_no_global_parameters.json --outdir results --skip_qc --missing_thresh 5 --distm hamming --count_missing --delimiter "."  --outlier_thresh 25 -e average --thresholds 10,5,2,1,0 --min_members 2 --partition_col cluster_id --id_col sample_id
   exit_code: 0
   stdout:
     contains:
       - "WARNING: skip QC (--skip_qc/-s) was provided, but this parameter is currently unused."
       - "WARNING: missing threshold (--missing_thresh) was provided, but this parameter is currently unused."
-      - "WARNING: distance method (--distm) was provided, but this parameter is currently unused."
       - "WARNING: count missing (--count_missing/-n) was provided, but this parameter is currently unused."
       - "WARNING: delimiter (--delimiter/-d) was provided, but this parameter is currently unused."
 
@@ -436,7 +435,6 @@
     contains:
       - "WARNING: skip QC (--skip_qc/-s) was provided, but this parameter is currently unused."
       - "WARNING: missing threshold (--missing_thresh) was provided, but this parameter is currently unused."
-      - "WARNING: distance method (--distm) was provided, but this parameter is currently unused."
       - "WARNING: count missing (--count_missing/-n) was provided, but this parameter is currently unused."
       - "WARNING: delimiter (--delimiter/-d) was provided, but this parameter is currently unused."
 
@@ -2190,3 +2188,127 @@
         - "S4\tS4\t2\t\t\t\t\t\t\t\t"
         - "S5\tS5\t3\t\t\t\t\t\t\t\t"
         - "S6\tS6\tunassociated\t\t\t\t\t\t\t\t"
+
+- name: Basic Hamming
+  tags:
+    - basic_hamming
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config.json --outdir results --distm hamming
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\tcount_country_Australia\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_NSW\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t3\t2\t0\t0\t3\t2\t5\t5\t0\t1\t0\t0\t3\t0\t1\tchicken,human\t2.0\t1.5\t2.0\t0.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t0\t1\t0\tchicken\t1.0\t1.0\t1.0\t1.0\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t0\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t0\t1\tchicken,human\t1.0\t1.0\t1.0\t1.0\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t0\t2\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t0\t2\t0\t0\t2\t2\t2\t0\t0\t0\t2\t0\t0\t0\thuman\t1.0\t1.0\t1.0\t1.0\t\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.1.2"
+        - "K\t1|1.1.1.2.3"
+        - "L\t1|1.1.1.2.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.1.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.1.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.1.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.1.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0\t1\t2\t2\t0"
+        - "B\t1\t0\t2\t2\t1"
+        - "K\t2\t2\t0\t1\t2"
+        - "L\t2\t2\t1\t0\t2"
+        - "M\t0\t1\t2\t2\t0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "10,5,2,1,0"'
+        - '"distm": "hamming"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
+
+- name: Basic Scaled
+  tags:
+    - basic_scaled
+  command: arborator --profile tests/data/profile.tsv --metadata tests/data/metadata.tsv --config tests/data/config_scaled_thresholds.json --outdir results --distm scaled
+  stdout:
+    must_not_contain:
+      - "parameter unrecognized"
+  files:
+    - path: "results/cluster_summary.tsv"
+      contains:
+        - "OutbreakID\tcount_country_Australia\tcount_country_Canada\tcount_country_United Kingdom\tcount_country_United States\tcount_host_chicken\tcount_host_human\tcount_members\tcount_organism_Salmonella enterica\tcount_outliers\tcount_state/province_British Columbia\tcount_state/province_California\tcount_state/province_England\tcount_state/province_NSW\tcount_state/province_New York\tcount_state/province_Ontario\thost\tmax_dist\tmean_dist\tmedian_dist\tmin_dist\toutlier_ids\tscore_max_value\tscore_mean_value\tscore_median_value\tscore_min_value"
+        - "1\t3\t2\t0\t0\t3\t2\t5\t5\t0\t1\t0\t0\t3\t0\t1\tchicken,human\t28.571428571428573\t21.42857142857143\t28.571428571428573\t0.0\t\t1.0\t1.0\t1.0\t1.0"
+        - "2\t0\t0\t0\t2\t2\t0\t2\t2\t0\t0\t1\t0\t0\t1\t0\tchicken\t14.285714285714286\t14.285714285714286\t14.285714285714286\t14.285714285714286\t\t2.0\t1.5\t1.5\t1.0"
+        - "3\t0\t2\t0\t0\t1\t1\t2\t2\t0\t1\t0\t0\t0\t0\t1\tchicken,human\t14.285714285714286\t14.285714285714286\t14.285714285714286\t14.285714285714286\t\t4.0\t3.5\t3.5\t3.0"
+        - "4\t0\t0\t0\t2\t0\t2\t2\t2\t0\t0\t0\t0\t0\t2\t0\thuman\t14.285714285714286\t14.285714285714286\t14.285714285714286\t14.285714285714286\t\t5.0\t3.5\t3.5\t2.0"
+        - "5\t0\t0\t2\t0\t0\t2\t2\t2\t0\t0\t0\t2\t0\t0\t0\thuman\t14.285714285714286\t14.285714285714286\t14.285714285714286\t14.285714285714286\t\t1.0\t1.0\t1.0\t1.0"
+    - path: "results/1/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "A\t1|1.1.1.1.1"
+        - "B\t1|1.1.1.2.2"
+        - "K\t1|1.1.2.3.3"
+        - "L\t1|1.1.2.4.4"
+        - "M\t1|1.1.1.1.1"
+    - path: "results/2/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "C\t2|1.1.1.1.1"
+        - "D\t2|1.1.1.2.2"
+    - path: "results/3/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "E\t3|1.1.1.1.1"
+        - "F\t3|1.1.1.2.2"
+    - path: "results/4/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "G\t4|1.1.1.1.1"
+        - "H\t4|1.1.1.2.2"
+    - path: "results/5/clusters.tsv"
+      contains:
+        - "sample_id\tgas_denovo_cluster_address"
+        - "I\t5|1.1.1.1.1"
+        - "J\t5|1.1.1.2.2"
+    - path: "results/1/matrix.tsv"
+      contains:
+        - "dists\tA\tB\tK\tL\tM"
+        - "A\t0.0\t14.285714285714286\t28.571428571428573\t28.571428571428573\t0.0"
+        - "B\t14.285714285714286\t0.0\t28.571428571428573\t28.571428571428573\t14.285714285714286"
+        - "K\t28.571428571428573\t28.571428571428573\t0.0\t14.285714285714286\t28.571428571428573"
+        - "L\t28.571428571428573\t28.571428571428573\t14.285714285714286\t0.0\t28.571428571428573"
+        - "M\t0.0\t14.285714285714286\t28.571428571428573\t28.571428571428573\t0.0"
+    - path: "results/run.json"
+      contains:
+        - '"partition_col": "cluster_id"'
+        - '"id_col": "sample_id"'
+        - '"method": "average"'
+        - '"thresholds": "40,30,20,10,0"'
+        - '"distm": "scaled"'
+    - path: "results/cluster_summary.xlsx"
+    - path: "results/metadata.included.xlsx"
